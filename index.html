@@ -1,0 +1,3215 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Kanban Companion Hub</title>
+    <link rel="manifest" href="./manifest.json">
+    <meta name="theme-color" content="#1e1e1e">
+    <meta name="mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <link rel="apple-touch-icon" href="./icon-192.png">
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;600;700&display=swap');
+
+        :root {
+            --bg-base: #1e1e1e;
+            --bg-panel: #252525;
+            --bg-input: #1a1a1a;
+            --border-color: #333333;
+            --border-focus: #7852ee;
+            --text-main: #dcddde;
+            --text-muted: #8b949e;
+            --accent: #7852ee;
+            --accent-hover: #5e3bc9;
+            --danger: #f85149;
+            --status-todo: #6b7280;
+            --status-doing: #f59e0b;
+            --status-done: #10b981;
+        }
+
+        * {
+            box-sizing: border-box;
+            -webkit-tap-highlight-color: transparent;
+        }
+
+        body {
+            background-color: var(--bg-base);
+            color: var(--text-main);
+            font-family: 'Inter', sans-serif;
+            margin: 0;
+            padding: 0;
+            height: 100dvh;
+            overflow: hidden;
+        }
+
+        .mono {
+            font-family: 'JetBrains Mono', monospace;
+        }
+
+        /* Scrollbars estilo Obsidian */
+        ::-webkit-scrollbar {
+            width: 7px;
+            height: 7px;
+        }
+        ::-webkit-scrollbar-track {
+            background: var(--bg-base);
+        }
+        ::-webkit-scrollbar-thumb {
+            background: #3d3d3d;
+            border-radius: 999px;
+        }
+        ::-webkit-scrollbar-thumb:hover {
+            background: #555555;
+        }
+
+        .input-obsidian {
+            background-color: var(--bg-input);
+            border: 1px solid var(--border-color);
+            color: var(--text-main);
+            transition: border-color 0.18s ease, box-shadow 0.18s ease;
+        }
+        .input-obsidian:focus {
+            outline: none;
+            border-color: var(--border-focus);
+            box-shadow: 0 0 0 1px var(--border-focus);
+        }
+        .input-obsidian::placeholder {
+            color: #666c75;
+        }
+
+        .btn-primary {
+            background-color: var(--accent);
+            color: #ffffff;
+            transition: background-color 0.18s ease, transform 0.12s ease;
+        }
+        .btn-primary:hover {
+            background-color: var(--accent-hover);
+        }
+        .btn-primary:active {
+            transform: scale(0.98);
+        }
+
+        .btn-secondary {
+            background-color: #2f2f2f;
+            color: var(--text-main);
+            border: 1px solid #3f3f3f;
+            transition: background-color 0.18s ease, border-color 0.18s ease;
+        }
+        .btn-secondary:hover {
+            background-color: #3a3a3a;
+            border-color: #505050;
+        }
+
+        .tag-pill {
+            background-color: rgba(120, 82, 238, 0.15);
+            color: #a388fa;
+            border: 1px solid rgba(120, 82, 238, 0.3);
+        }
+
+        /* Quadro Infinito (Spatial Canvas) */
+        .bg-dots {
+            background-image: radial-gradient(circle, #343434 1.2px, transparent 1.2px);
+            background-size: 24px 24px;
+        }
+
+        #canvas-container {
+            transform-origin: 0 0;
+            transition: transform 0.08s ease-out;
+        }
+
+        .kanban-card {
+            background-color: var(--bg-panel);
+            position: absolute;
+            width: 300px;
+            height: fit-content;
+            z-index: 10;
+            transition: border-color 0.2s ease, box-shadow 0.2s ease, opacity 0.2s ease;
+        }
+        .kanban-card:hover {
+            border-color: #555555;
+            z-index: 20;
+        }
+        .kanban-card.is-dragging {
+            z-index: 60 !important;
+            opacity: 0.96;
+            box-shadow: 0 18px 38px rgba(0, 0, 0, 0.65);
+        }
+
+        .drag-handle {
+            cursor: grab;
+            touch-action: none; /* Garante arrasto suave por toque no celular */
+            user-select: none;
+        }
+        .drag-handle:active {
+            cursor: grabbing;
+        }
+
+        /* Item ativo na navegação */
+        .nav-item-active {
+            background-color: rgba(120, 82, 238, 0.16);
+            color: #ffffff;
+            border-color: rgba(120, 82, 238, 0.45);
+        }
+
+        @keyframes slideUp {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        .animate-slide-up {
+            animation: slideUp 0.2s ease-out forwards;
+        }
+
+        .no-scrollbar::-webkit-scrollbar {
+            display: none;
+        }
+        .no-scrollbar {
+            -ms-overflow-style: none;
+            scrollbar-width: none;
+        }
+    </style>
+</head>
+<body class="flex flex-col md:flex-row h-[100dvh] w-screen overflow-hidden text-sm">
+
+    <!-- =========================================================
+         BARRA LATERAL ESQUERDA (DESKTOP)
+         ========================================================= -->
+    <aside class="hidden md:flex md:w-56 lg:w-64 bg-[#252525] border-r border-[#333333] flex-col shrink-0 z-30 select-none">
+        <!-- Marca -->
+        <div class="p-4 border-b border-[#333333] flex items-center gap-3">
+            <div class="w-9 h-9 rounded-xl bg-[#7852ee]/20 border border-[#7852ee]/40 flex items-center justify-center shrink-0">
+                <svg class="w-5 h-5 text-[#a388fa]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 002-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10"></path>
+                </svg>
+            </div>
+            <div class="min-w-0">
+                <h1 class="font-bold text-base text-white tracking-tight truncate">Kanban Hub</h1>
+                <p class="text-[11px] text-[#8b949e] truncate">Companion Pessoal</p>
+            </div>
+        </div>
+
+        <!-- Lista dos 7 Módulos -->
+        <nav id="desktopNav" class="flex-1 overflow-y-auto p-3 space-y-1">
+            <!-- Injetado via JS -->
+        </nav>
+
+        <!-- Rodapé: Nuvem / Backup -->
+        <div class="p-3 border-t border-[#333333] bg-[#202020] space-y-2">
+            <button onclick="app.openCloudModal()" class="w-full flex items-center gap-2.5 px-3 py-2.5 rounded-xl bg-[#1a1a1a] border border-[#333333] hover:border-[#7852ee]/60 transition-colors text-left">
+                <span id="syncDotDesktop" class="w-2.5 h-2.5 rounded-full bg-[#8b949e] shrink-0"></span>
+                <div class="min-w-0 flex-1">
+                    <div class="text-xs font-semibold text-gray-100 truncate">Nuvem / Backup</div>
+                    <div id="syncLabelDesktop" class="text-[10px] text-[#8b949e] truncate">Somente Local</div>
+                </div>
+                <svg class="w-4 h-4 text-[#8b949e] shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 15a4 4 0 004 4h9a5 5 0 10-.1-9.999 5.002 5.002 0 10-9.78 2.096A4.001 4.001 0 003 15z"></path>
+                </svg>
+            </button>
+        </div>
+    </aside>
+
+    <!-- =========================================================
+         ÁREA PRINCIPAL
+         ========================================================= -->
+    <div class="flex-1 flex flex-col min-w-0 h-full overflow-hidden">
+
+        <!-- CABEÇALHO SUPERIOR -->
+        <header class="bg-[#252525] border-b border-[#333333] px-3 sm:px-5 py-2.5 flex items-center justify-between gap-3 shrink-0 z-20">
+            <div class="flex items-center gap-2.5 min-w-0">
+                <div id="headerModuleIcon" class="text-[#a388fa] shrink-0"></div>
+                <div class="min-w-0">
+                    <h2 id="headerModuleTitle" class="font-semibold text-base sm:text-lg text-white truncate leading-tight">Quadro Kanban</h2>
+                    <p id="headerModuleSubtitle" class="text-[11px] text-[#8b949e] hidden sm:block truncate">Índice digital dos seus post-its físicos</p>
+                </div>
+            </div>
+
+            <div class="flex items-center gap-2 shrink-0">
+                <div id="headerActions" class="flex items-center gap-1.5 sm:gap-2">
+                    <!-- Ações específicas de cada módulo -->
+                </div>
+                <!-- Indicador Nuvem Mobile -->
+                <button onclick="app.openCloudModal()" class="md:hidden flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg bg-[#1a1a1a] border border-[#333333]" title="Nuvem Firebase e Backup">
+                    <span id="syncDotMobile" class="w-2 h-2 rounded-full bg-[#8b949e]"></span>
+                    <span id="syncLabelMobile" class="text-[11px] text-gray-300 font-medium">Local</span>
+                </button>
+            </div>
+        </header>
+
+        <!-- VIEWPORT DOS MÓDULOS -->
+        <main id="moduleViewport" class="flex-1 flex flex-col min-h-0 overflow-hidden pb-16 md:pb-0 relative">
+
+            <!-- =================================================
+                 MÓDULO 1: QUADRO KANBAN (POST-ITS FÍSICOS)
+                 ================================================= -->
+            <section id="view-kanban" class="module-view flex-1 flex flex-col min-h-0 overflow-hidden">
+                <!-- Barra de ferramentas do Kanban -->
+                <div class="bg-[#212121] border-b border-[#333333] px-3 sm:px-5 py-2.5 flex flex-wrap items-center justify-between gap-2 shrink-0">
+                    <!-- Busca Instantânea -->
+                    <div class="relative flex-1 min-w-[160px] max-w-md">
+                        <input type="text" id="kanbanSearch" placeholder="Buscar código, título, tag ou descrição..." oninput="app.renderKanban()" class="w-full input-obsidian rounded-lg py-1.5 pl-9 pr-3 text-xs sm:text-sm">
+                        <svg class="w-4 h-4 absolute left-2.5 top-2 text-[#8b949e]" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path></svg>
+                    </div>
+
+                    <!-- Alternador Quadro/Lista + Filtro Estágio -->
+                    <div class="flex items-center gap-2">
+                        <div class="flex bg-[#1a1a1a] border border-[#333333] rounded-lg p-0.5">
+                            <button id="btnModeCanvas" onclick="app.setKanbanViewMode('canvas')" class="px-2.5 py-1 rounded-md text-xs font-medium transition-colors flex items-center gap-1.5">
+                                <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 5a1 1 0 011-1h4a1 1 0 011 1v4a1 1 0 01-1 1H5a1 1 0 01-1-1V5zm10 0a1 1 0 011-1h4a1 1 0 011 1v4a1 1 0 01-1 1h-4a1 1 0 01-1-1V5zM4 15a1 1 0 011-1h4a1 1 0 011 1v4a1 1 0 01-1 1H5a1 1 0 01-1-1v-4zm10 0a1 1 0 011-1h4a1 1 0 011 1v4a1 1 0 01-1 1h-4a1 1 0 01-1-1v-4z"></path></svg>
+                                <span class="hidden sm:inline">Modo Quadro</span>
+                                <span class="sm:hidden">Quadro</span>
+                            </button>
+                            <button id="btnModeList" onclick="app.setKanbanViewMode('list')" class="px-2.5 py-1 rounded-md text-xs font-medium transition-colors flex items-center gap-1.5">
+                                <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16"></path></svg>
+                                <span class="hidden sm:inline">Modo Lista</span>
+                                <span class="sm:hidden">Lista</span>
+                            </button>
+                        </div>
+
+                        <select id="kanbanStatusFilter" onchange="app.renderKanban()" class="input-obsidian rounded-lg py-1.5 px-2 text-xs">
+                            <option value="all">Todos estágios</option>
+                            <option value="todo">A Fazer</option>
+                            <option value="doing">Em Andamento</option>
+                            <option value="done">Concluído</option>
+                        </select>
+                    </div>
+                </div>
+
+                <!-- Corpo Kanban: Painel Recolhível (Desktop) + Quadro/Lista -->
+                <div class="flex-1 flex min-h-0 overflow-hidden relative">
+
+                    <!-- Painel Recolhível de Criação/Edição no Desktop (para deixar o quadro amplo quando fechado) -->
+                    <div id="kanbanDesktopDrawer" class="hidden md:flex w-80 bg-[#252525] border-r border-[#333333] flex-col shrink-0 z-20 overflow-y-auto p-4">
+                        <div class="flex items-center justify-between mb-4">
+                            <h3 id="desktopKanbanFormTitle" class="text-sm font-bold text-white">Novo Post-it Digital</h3>
+                            <button onclick="app.closeKanbanForm()" class="p-1 text-[#8b949e] hover:text-white rounded-lg" title="Recolher painel">✕</button>
+                        </div>
+                        <form id="kanbanDesktopForm" onsubmit="app.saveKanbanEntry(event, 'desktop')" class="space-y-3">
+                            <input type="hidden" id="kdId">
+                            <div class="grid grid-cols-2 gap-2.5">
+                                <div>
+                                    <label class="block text-[11px] text-[#8b949e] mb-1">Código Físico *</label>
+                                    <input type="text" id="kdCode" required placeholder="Ex: LR-01" class="w-full input-obsidian rounded-lg p-2 mono font-bold text-[#a388fa] text-sm">
+                                </div>
+                                <div>
+                                    <label class="block text-[11px] text-[#8b949e] mb-1">Estágio</label>
+                                    <select id="kdStatus" class="w-full input-obsidian rounded-lg p-2 text-xs">
+                                        <option value="todo">A Fazer</option>
+                                        <option value="doing">Em Andamento</option>
+                                        <option value="done">Concluído</option>
+                                    </select>
+                                </div>
+                            </div>
+                            <div>
+                                <label class="block text-[11px] text-[#8b949e] mb-1">Título *</label>
+                                <input type="text" id="kdTitle" required placeholder="Ex: Mexer no Last Ride" class="w-full input-obsidian rounded-lg p-2 text-sm">
+                            </div>
+                            <div>
+                                <label class="block text-[11px] text-[#8b949e] mb-1">Tag / Categoria</label>
+                                <input type="text" id="kdTag" placeholder="Ex: LastRide, Arquivista, Dev" class="w-full input-obsidian rounded-lg p-2 text-sm">
+                            </div>
+                            <div>
+                                <label class="block text-[11px] text-[#8b949e] mb-1">Descrição</label>
+                                <textarea id="kdDesc" rows="5" placeholder="Detalhes que não couberam no post-it de papel..." class="w-full input-obsidian rounded-lg p-2 text-sm resize-y"></textarea>
+                            </div>
+                            <div class="flex gap-2 pt-1">
+                                <button type="button" onclick="app.closeKanbanForm()" class="flex-1 btn-secondary py-2 rounded-lg text-xs font-medium">Fechar</button>
+                                <button type="submit" class="flex-1 btn-primary py-2 rounded-lg text-xs font-semibold">Salvar Post-it</button>
+                            </div>
+                        </form>
+                    </div>
+
+                    <!-- MODO A: Quadro Infinito (3000x3000px) -->
+                    <div id="kanbanCanvasWrapper" class="flex-1 overflow-auto relative bg-dots">
+                        <div id="kanbanEmptyCanvas" class="hidden absolute inset-0 flex-col items-center justify-center text-center text-[#8b949e] pointer-events-none p-6">
+                            <svg class="w-14 h-14 mb-3 opacity-40" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 002-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10"></path></svg>
+                            <p class="text-base font-medium text-gray-300">Nenhum post-it encontrado</p>
+                            <p class="text-xs mt-1">Clique em "+ Post-it" no topo para cadastrar um código físico.</p>
+                        </div>
+
+                        <div id="canvas-container" class="relative w-[3000px] h-[3000px]">
+                            <svg id="linksLayer" class="absolute top-0 left-0 w-full h-full pointer-events-none z-0"></svg>
+                            <div id="kanbanCanvasGrid" class="absolute top-0 left-0 w-full h-full z-10">
+                                <!-- Cards absolutos injetados via JS -->
+                            </div>
+                        </div>
+
+                        <!-- Controles Flutuantes de Zoom -->
+                        <div class="fixed bottom-20 md:bottom-6 right-4 md:right-6 z-40 flex bg-[#252525]/95 backdrop-blur border border-[#3a3a3a] rounded-xl shadow-xl overflow-hidden">
+                            <button onclick="app.changeZoom(-0.1)" class="px-3 py-2 text-gray-300 hover:text-white hover:bg-[#333333] transition-colors" title="Diminuir Zoom">
+                                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20 12H4"></path></svg>
+                            </button>
+                            <button id="zoomLevelDisplay" onclick="app.resetZoom()" class="px-2.5 py-2 text-xs mono text-gray-200 hover:bg-[#333333] min-w-[54px] text-center transition-colors border-x border-[#333333]" title="Resetar Zoom (100%)">
+                                100%
+                            </button>
+                            <button onclick="app.changeZoom(0.1)" class="px-3 py-2 text-gray-300 hover:text-white hover:bg-[#333333] transition-colors" title="Aumentar Zoom">
+                                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"></path></svg>
+                            </button>
+                        </div>
+                    </div>
+
+                    <!-- MODO B: Modo Lista (Ideal no celular) -->
+                    <div id="kanbanListWrapper" class="hidden flex-1 overflow-y-auto p-3 sm:p-5">
+                        <div id="kanbanListGrid" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-3.5 max-w-7xl mx-auto">
+                            <!-- Cards em lista injetados via JS -->
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- =================================================
+                 MÓDULO 2: IDEIAS ALEATÓRIAS
+                 ================================================= -->
+            <section id="view-ideas" class="module-view hidden flex-1 overflow-y-auto p-3 sm:p-6">
+                <div class="max-w-6xl mx-auto space-y-5">
+                    <!-- Captura Rápida -->
+                    <form id="ideaQuickForm" onsubmit="app.saveQuickIdea(event)" class="bg-[#252525] border border-[#333333] rounded-xl p-4 shadow-sm space-y-3">
+                        <div class="flex flex-col sm:flex-row gap-2.5">
+                            <input type="text" id="ideaTitleInput" placeholder="Título curto (opcional)..." class="flex-1 input-obsidian rounded-lg px-3 py-2 text-sm font-medium">
+                            <input type="text" id="ideaTagsInput" placeholder="Tags separadas por vírgula (ex: Godot, RPG, App)" class="sm:w-72 input-obsidian rounded-lg px-3 py-2 text-sm">
+                        </div>
+                        <textarea id="ideaTextInput" rows="2" required placeholder="Anote sua ideia antes que suma da cabeça..." class="w-full input-obsidian rounded-lg px-3 py-2 text-sm resize-y"></textarea>
+                        <div class="flex flex-wrap items-center justify-between gap-2">
+                            <span class="text-xs text-[#8b949e]">Dica: clique em "Virar Post-it" para enviar a ideia direto ao Kanban.</span>
+                            <button type="submit" class="btn-primary px-4 py-2 rounded-lg text-xs sm:text-sm font-semibold flex items-center gap-1.5">
+                                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"></path></svg>
+                                Capturar Ideia
+                            </button>
+                        </div>
+                    </form>
+
+                    <!-- Busca & Filtro de Tags -->
+                    <div class="flex flex-col sm:flex-row items-stretch sm:items-center gap-3">
+                        <div class="relative flex-1 max-w-md">
+                            <input type="text" id="ideaSearchInput" placeholder="Buscar ideias..." oninput="app.renderIdeas()" class="w-full input-obsidian rounded-lg py-2 pl-9 pr-3 text-sm">
+                            <svg class="w-4 h-4 absolute left-3 top-2.5 text-[#8b949e]" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path></svg>
+                        </div>
+                        <div id="ideaTagFilters" class="flex items-center gap-1.5 overflow-x-auto no-scrollbar pb-0.5">
+                            <!-- Pills de tags -->
+                        </div>
+                    </div>
+
+                    <!-- Grade de Ideias -->
+                    <div id="ideasGrid" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+                        <!-- Cards de ideias -->
+                    </div>
+                </div>
+            </section>
+
+            <!-- =================================================
+                 MÓDULO 3: LINKS & REDES (TIKTOK, INSTA, YT, X...)
+                 ================================================= -->
+            <section id="view-links" class="module-view hidden flex-1 overflow-y-auto p-3 sm:p-6">
+                <div class="max-w-6xl mx-auto space-y-5">
+                    <!-- Formulário Rápido de Links -->
+                    <form id="linkQuickForm" onsubmit="app.saveLinkItem(event)" class="bg-[#252525] border border-[#333333] rounded-xl p-4 shadow-sm space-y-3">
+                        <input type="hidden" id="linkEditId">
+                        <div class="grid grid-cols-1 md:grid-cols-12 gap-2.5">
+                            <input type="url" id="linkUrlInput" required placeholder="https://www.tiktok.com/... ou instagram.com/..." class="md:col-span-6 input-obsidian rounded-lg px-3 py-2 text-sm mono">
+                            <input type="text" id="linkCategoryInput" placeholder="Coleção / Categoria (ex: Game Dev, Receitas)" class="md:col-span-3 input-obsidian rounded-lg px-3 py-2 text-sm">
+                            <input type="text" id="linkTagsInput" placeholder="Tags (vírgula): godot, shader" class="md:col-span-3 input-obsidian rounded-lg px-3 py-2 text-sm">
+                        </div>
+                        <div class="flex flex-col sm:flex-row gap-2.5">
+                            <input type="text" id="linkTitleInput" required placeholder="Título ou resumo do vídeo / post..." class="flex-1 input-obsidian rounded-lg px-3 py-2 text-sm">
+                            <div class="flex gap-2">
+                                <button type="button" id="btnCancelLinkEdit" onclick="app.resetLinkForm()" class="hidden btn-secondary px-3 py-2 rounded-lg text-xs font-medium">Cancelar</button>
+                                <button type="submit" id="btnSubmitLink" class="btn-primary px-4 py-2 rounded-lg text-xs sm:text-sm font-semibold flex items-center justify-center gap-1.5 shrink-0">
+                                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path></svg>
+                                    Salvar Link
+                                </button>
+                            </div>
+                        </div>
+                    </form>
+
+                    <!-- Barra de Filtros -->
+                    <div class="flex flex-col lg:flex-row gap-3 items-stretch lg:items-center justify-between">
+                        <div class="flex items-center gap-1.5 overflow-x-auto no-scrollbar pb-0.5" id="linkPlatformFilters">
+                            <!-- Pills de plataforma -->
+                        </div>
+                        <div class="flex flex-wrap items-center gap-2">
+                            <input type="text" id="linkSearchInput" placeholder="Buscar links ou tags..." oninput="app.renderLinks()" class="flex-1 sm:w-48 input-obsidian rounded-lg px-3 py-1.5 text-xs sm:text-sm">
+                            <select id="linkCategoryFilter" onchange="app.renderLinks()" class="input-obsidian rounded-lg px-2.5 py-1.5 text-xs sm:text-sm">
+                                <option value="all">Todas coleções</option>
+                            </select>
+                            <select id="linkStatusFilter" onchange="app.renderLinks()" class="input-obsidian rounded-lg px-2.5 py-1.5 text-xs sm:text-sm">
+                                <option value="all">Todos</option>
+                                <option value="pending">Pendentes</option>
+                                <option value="watched">Assistidos</option>
+                            </select>
+                        </div>
+                    </div>
+
+                    <!-- Grade de Links -->
+                    <div id="linksGrid" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3.5">
+                        <!-- Cards de links -->
+                    </div>
+                </div>
+            </section>
+
+            <!-- =================================================
+                 MÓDULO 4: LISTAS & CHECKLISTS (MERCADO, XEROX...)
+                 ================================================= -->
+            <section id="view-lists" class="module-view hidden flex-1 overflow-y-auto p-3 sm:p-6">
+                <div class="max-w-6xl mx-auto grid grid-cols-1 lg:grid-cols-12 gap-5 items-start">
+                    <!-- Coluna das Listas -->
+                    <div class="lg:col-span-4 bg-[#252525] border border-[#333333] rounded-xl p-4 space-y-3">
+                        <div class="flex items-center justify-between">
+                            <h3 class="font-semibold text-white text-sm">Minhas Listas</h3>
+                            <button onclick="app.openListModal()" class="btn-primary px-2.5 py-1.5 rounded-lg text-xs font-semibold flex items-center gap-1">
+                                <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"></path></svg>
+                                Nova Lista
+                            </button>
+                        </div>
+                        <div id="listsSidebar" class="space-y-2">
+                            <!-- Listas -->
+                        </div>
+                    </div>
+
+                    <!-- Painel da Lista Selecionada -->
+                    <div class="lg:col-span-8 bg-[#252525] border border-[#333333] rounded-xl p-4 sm:p-5 min-h-[360px]" id="activeListContainer">
+                        <!-- Conteúdo da lista ativa -->
+                    </div>
+                </div>
+            </section>
+
+            <!-- =================================================
+                 MÓDULO 5: PROJETOS ATIVOS (ROADMAP & FEATURES)
+                 ================================================= -->
+            <section id="view-projects" class="module-view hidden flex-1 overflow-y-auto p-3 sm:p-6">
+                <div class="max-w-6xl mx-auto space-y-5">
+                    <!-- Cards dos Projetos -->
+                    <div id="projectsGrid" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3.5">
+                        <!-- Projetos -->
+                    </div>
+
+                    <!-- Backlog / Features do Projeto Selecionado -->
+                    <div id="activeProjectPanel" class="bg-[#252525] border border-[#333333] rounded-xl p-4 sm:p-5">
+                        <!-- Painel do projeto ativo -->
+                    </div>
+                </div>
+            </section>
+
+            <!-- =================================================
+                 MÓDULO 6: CALENDÁRIO (AGENDA)
+                 ================================================= -->
+            <section id="view-calendar" class="module-view hidden flex-1 overflow-y-auto p-3 sm:p-6">
+                <div class="max-w-6xl mx-auto grid grid-cols-1 lg:grid-cols-12 gap-5 items-start">
+                    <!-- Grade Mensal -->
+                    <div class="lg:col-span-7 bg-[#252525] border border-[#333333] rounded-xl p-4">
+                        <div class="flex items-center justify-between mb-4">
+                            <h3 id="calendarMonthLabel" class="font-bold text-base sm:text-lg text-white capitalize">--</h3>
+                            <div class="flex items-center gap-1.5">
+                                <button onclick="app.shiftCalendarMonth(-1)" class="btn-secondary p-2 rounded-lg" title="Mês anterior">
+                                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"></path></svg>
+                                </button>
+                                <button onclick="app.goToToday()" class="btn-secondary px-3 py-1.5 rounded-lg text-xs font-semibold">Hoje</button>
+                                <button onclick="app.shiftCalendarMonth(1)" class="btn-secondary p-2 rounded-lg" title="Próximo mês">
+                                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"></path></svg>
+                                </button>
+                            </div>
+                        </div>
+                        <div class="grid grid-cols-7 gap-1 text-center text-[11px] font-semibold text-[#8b949e] mb-2">
+                            <div>Dom</div><div>Seg</div><div>Ter</div><div>Qua</div><div>Qui</div><div>Sex</div><div>Sáb</div>
+                        </div>
+                        <div id="calendarDaysGrid" class="grid grid-cols-7 gap-1.5">
+                            <!-- Dias -->
+                        </div>
+                    </div>
+
+                    <!-- Coluna Direita: Dia Selecionado + Próximos -->
+                    <div class="lg:col-span-5 space-y-5">
+                        <div class="bg-[#252525] border border-[#333333] rounded-xl p-4 space-y-4">
+                            <div class="flex items-center justify-between gap-2 border-b border-[#333333] pb-3">
+                                <div>
+                                    <span class="text-[11px] uppercase tracking-wider text-[#a388fa] font-semibold">Dia Selecionado</span>
+                                    <h4 id="selectedDateHeading" class="font-bold text-white text-sm sm:text-base capitalize">--</h4>
+                                </div>
+                                <button onclick="app.openEventModal()" class="btn-primary px-3 py-1.5 rounded-lg text-xs font-semibold flex items-center gap-1 shrink-0">
+                                    <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"></path></svg>
+                                    Evento
+                                </button>
+                            </div>
+                            <div id="selectedDayEventsList" class="space-y-2.5">
+                                <!-- Eventos do dia -->
+                            </div>
+                        </div>
+
+                        <div class="bg-[#252525] border border-[#333333] rounded-xl p-4 space-y-3">
+                            <h4 class="font-semibold text-sm text-white flex items-center gap-2">
+                                <svg class="w-4 h-4 text-[#a388fa]" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
+                                Próximos Compromissos
+                            </h4>
+                            <div id="upcomingEventsList" class="space-y-2 max-h-64 overflow-y-auto pr-1">
+                                <!-- Próximos eventos -->
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- =================================================
+                 MÓDULO 7: LEITURAS (LIVROS, MANGÁS E HQs)
+                 ================================================= -->
+            <section id="view-readings" class="module-view hidden flex-1 overflow-y-auto p-3 sm:p-6">
+                <div class="max-w-6xl mx-auto space-y-5">
+                    <!-- Barra de Filtros -->
+                    <div class="flex flex-col sm:flex-row gap-2.5 items-stretch sm:items-center justify-between bg-[#252525] border border-[#333333] rounded-xl p-3">
+                        <div class="relative flex-1 max-w-md">
+                            <input type="text" id="readingSearchInput" placeholder="Buscar livro, mangá ou HQ..." oninput="app.renderReadings()" class="w-full input-obsidian rounded-lg py-1.5 pl-9 pr-3 text-sm">
+                            <svg class="w-4 h-4 absolute left-3 top-2 text-[#8b949e]" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path></svg>
+                        </div>
+                        <div class="flex flex-wrap gap-2">
+                            <select id="readingTypeFilter" onchange="app.renderReadings()" class="input-obsidian rounded-lg px-2.5 py-1.5 text-xs sm:text-sm">
+                                <option value="all">Todos tipos</option>
+                                <option value="Livro">Livro</option>
+                                <option value="Mangá">Mangá</option>
+                                <option value="HQ">HQ</option>
+                            </select>
+                            <select id="readingStatusFilter" onchange="app.renderReadings()" class="input-obsidian rounded-lg px-2.5 py-1.5 text-xs sm:text-sm">
+                                <option value="all">Todos status</option>
+                                <option value="Lendo">Lendo</option>
+                                <option value="Quero Ler">Quero Ler</option>
+                                <option value="Pausado">Pausado</option>
+                                <option value="Concluído">Concluído</option>
+                            </select>
+                        </div>
+                    </div>
+
+                    <!-- Grade de Leituras -->
+                    <div id="readingsGrid" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+                        <!-- Cards de leituras -->
+                    </div>
+                </div>
+            </section>
+
+        </main>
+    </div>
+
+    <!-- =========================================================
+         NAVEGAÇÃO INFERIOR FIXA (CELULAR)
+         ========================================================= -->
+    <nav id="mobileBottomNav" class="md:hidden fixed bottom-0 left-0 right-0 h-16 bg-[#252525]/95 backdrop-blur border-t border-[#333333] z-40 grid grid-cols-5 px-1">
+        <!-- Populado via JS: Kanban, Ideias, Listas, Agenda, Mais -->
+    </nav>
+
+    <!-- =========================================================
+         GAVETA MOBILE ("MAIS" — TODOS OS 7 MÓDULOS + NUVEM/BACKUP)
+         ========================================================= -->
+    <div id="mobileMenuModal" class="hidden fixed inset-0 bg-black/75 backdrop-blur-sm z-50 flex items-end justify-center md:hidden" onclick="if(event.target === this) app.closeMobileMenu()">
+        <div class="bg-[#252525] border-t border-[#3a3a3a] rounded-t-2xl w-full max-h-[85dvh] overflow-y-auto p-4 pb-6 space-y-4 animate-slide-up">
+            <div class="flex items-center justify-between border-b border-[#333333] pb-3">
+                <div>
+                    <h3 class="font-bold text-white text-base">Todos os Módulos</h3>
+                    <p class="text-xs text-[#8b949e]">Kanban Companion Hub</p>
+                </div>
+                <button onclick="app.closeMobileMenu()" class="p-2 rounded-lg bg-[#1a1a1a] text-gray-400 hover:text-white">
+                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path></svg>
+                </button>
+            </div>
+            <div id="mobileDrawerGrid" class="grid grid-cols-2 gap-2.5">
+                <!-- Todos os 7 módulos -->
+            </div>
+            <div class="pt-3 border-t border-[#333333]">
+                <button onclick="app.closeMobileMenu(); app.openCloudModal()" class="w-full btn-secondary py-3 px-4 rounded-xl text-xs font-semibold flex items-center justify-center gap-2">
+                    <svg class="w-4 h-4 text-[#a388fa]" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 15a4 4 0 004 4h9a5 5 0 10-.1-9.999 5.002 5.002 0 10-9.78 2.096A4.001 4.001 0 003 15z"></path></svg>
+                    Configurar Nuvem Firebase & Backup JSON
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- =========================================================
+         MODAIS CUSTOMIZADOS (SEM ALERT / CONFIRM / PROMPT NATIVOS)
+         ========================================================= -->
+
+    <!-- Modal Mobile: Criar / Editar Post-it Kanban -->
+    <div id="kanbanFormModal" class="hidden fixed inset-0 bg-black/80 backdrop-blur-sm z-50 flex items-center justify-center p-4" onclick="if(event.target === this) app.closeModal('kanbanFormModal')">
+        <div class="bg-[#252525] border border-[#3a3a3a] rounded-2xl w-full max-w-md p-5 shadow-2xl max-h-[90dvh] overflow-y-auto">
+            <div class="flex items-center justify-between mb-4">
+                <h3 id="kanbanModalTitle" class="text-base font-bold text-white">Novo Post-it Digital</h3>
+                <button onclick="app.closeModal('kanbanFormModal')" class="text-gray-400 hover:text-white p-1">✕</button>
+            </div>
+            <form id="kanbanMobileForm" onsubmit="app.saveKanbanEntry(event, 'modal')" class="space-y-3.5">
+                <input type="hidden" id="kmId">
+                <div class="grid grid-cols-2 gap-3">
+                    <div>
+                        <label class="block text-xs text-[#8b949e] mb-1">Código Físico *</label>
+                        <input type="text" id="kmCode" required placeholder="Ex: LR-01" class="w-full input-obsidian rounded-lg p-2.5 mono font-bold text-[#a388fa]">
+                    </div>
+                    <div>
+                        <label class="block text-xs text-[#8b949e] mb-1">Estágio</label>
+                        <select id="kmStatus" class="w-full input-obsidian rounded-lg p-2.5 text-sm">
+                            <option value="todo">A Fazer</option>
+                            <option value="doing">Em Andamento</option>
+                            <option value="done">Concluído</option>
+                        </select>
+                    </div>
+                </div>
+                <div>
+                    <label class="block text-xs text-[#8b949e] mb-1">Título *</label>
+                    <input type="text" id="kmTitle" required placeholder="Ex: Mexer no Last Ride" class="w-full input-obsidian rounded-lg p-2.5 text-sm">
+                </div>
+                <div>
+                    <label class="block text-xs text-[#8b949e] mb-1">Tag / Categoria</label>
+                    <input type="text" id="kmTag" placeholder="Ex: LastRide, Arquivista, Dev" class="w-full input-obsidian rounded-lg p-2.5 text-sm">
+                </div>
+                <div>
+                    <label class="block text-xs text-[#8b949e] mb-1">Descrição</label>
+                    <textarea id="kmDesc" rows="4" placeholder="O que não coube no post-it de papel..." class="w-full input-obsidian rounded-lg p-2.5 text-sm resize-y"></textarea>
+                </div>
+                <div class="flex gap-2.5 pt-2">
+                    <button type="button" onclick="app.closeModal('kanbanFormModal')" class="flex-1 btn-secondary py-2.5 rounded-lg text-sm font-medium">Cancelar</button>
+                    <button type="submit" class="flex-1 btn-primary py-2.5 rounded-lg text-sm font-semibold">Salvar Post-it</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Modal: Ligações / Dependências do Kanban -->
+    <div id="kanbanLinkModal" class="hidden fixed inset-0 bg-black/80 backdrop-blur-sm z-50 flex items-center justify-center p-4" onclick="if(event.target === this) app.closeModal('kanbanLinkModal')">
+        <div class="bg-[#252525] border border-[#3a3a3a] rounded-2xl w-full max-w-md p-5 shadow-2xl">
+            <h3 class="text-base font-bold text-white mb-1">Ligar Dependências</h3>
+            <p class="text-xs text-[#8b949e] mb-4">Selecione os post-its ligados a <span id="kanbanLinkSourceLabel" class="mono text-[#a388fa] font-bold"></span>:</p>
+            <div id="kanbanLinkCheckboxes" class="space-y-1.5 max-h-64 overflow-y-auto pr-1 mb-5"></div>
+            <div class="flex gap-2.5">
+                <button onclick="app.closeModal('kanbanLinkModal')" class="flex-1 btn-secondary py-2 rounded-lg text-sm">Cancelar</button>
+                <button onclick="app.saveKanbanLinks()" class="flex-1 btn-primary py-2 rounded-lg text-sm font-semibold">Salvar Ligações</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal: Sortear (Ferramenta TDAH) -->
+    <div id="randomModal" class="hidden fixed inset-0 bg-black/85 backdrop-blur-sm z-50 flex items-center justify-center p-4" onclick="if(event.target === this) app.closeModal('randomModal')">
+        <div class="bg-[#252525] border-2 border-[#7852ee] rounded-2xl w-full max-w-md p-6 sm:p-7 text-center relative overflow-hidden shadow-2xl">
+            <div class="absolute top-0 left-0 w-full h-1.5 bg-gradient-to-r from-[#7852ee] to-[#a388fa]"></div>
+            <h3 class="text-xl font-bold text-white mb-1">Sua missão agora é:</h3>
+            <p class="text-xs text-[#8b949e] mb-5">Sem pensar demais, apenas comece.</p>
+            <div id="randomTaskContent" class="my-4 bg-[#1a1a1a] border border-[#333333] rounded-xl p-5"></div>
+            <div class="flex gap-2.5 mt-5">
+                <button onclick="app.openRandomizer()" class="btn-secondary px-4 py-3 rounded-xl text-sm font-semibold">Sortear outro</button>
+                <button onclick="app.closeModal('randomModal')" class="flex-1 btn-primary py-3 rounded-xl text-base font-bold">Bora lá! 🚀</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal: Editar Ideia -->
+    <div id="ideaEditModal" class="hidden fixed inset-0 bg-black/80 backdrop-blur-sm z-50 flex items-center justify-center p-4" onclick="if(event.target === this) app.closeModal('ideaEditModal')">
+        <div class="bg-[#252525] border border-[#3a3a3a] rounded-2xl w-full max-w-md p-5 shadow-2xl">
+            <h3 class="text-base font-bold text-white mb-4">Editar Ideia</h3>
+            <form onsubmit="app.updateIdea(event)" class="space-y-3">
+                <input type="hidden" id="editIdeaId">
+                <input type="text" id="editIdeaTitle" placeholder="Título (opcional)" class="w-full input-obsidian rounded-lg p-2.5 text-sm">
+                <input type="text" id="editIdeaTags" placeholder="Tags separadas por vírgula" class="w-full input-obsidian rounded-lg p-2.5 text-sm">
+                <textarea id="editIdeaText" rows="4" required class="w-full input-obsidian rounded-lg p-2.5 text-sm resize-y"></textarea>
+                <div class="flex gap-2.5 pt-2">
+                    <button type="button" onclick="app.closeModal('ideaEditModal')" class="flex-1 btn-secondary py-2 rounded-lg text-sm">Cancelar</button>
+                    <button type="submit" class="flex-1 btn-primary py-2 rounded-lg text-sm font-semibold">Atualizar</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Modal: Criar / Renomear Lista -->
+    <div id="listModal" class="hidden fixed inset-0 bg-black/80 backdrop-blur-sm z-50 flex items-center justify-center p-4" onclick="if(event.target === this) app.closeModal('listModal')">
+        <div class="bg-[#252525] border border-[#3a3a3a] rounded-2xl w-full max-w-sm p-5 shadow-2xl">
+            <h3 id="listModalTitle" class="text-base font-bold text-white mb-4">Nova Lista</h3>
+            <form onsubmit="app.saveListMeta(event)" class="space-y-3.5">
+                <input type="hidden" id="listModalId">
+                <div>
+                    <label class="block text-xs text-[#8b949e] mb-1">Nome da Lista *</label>
+                    <input type="text" id="listNameInput" required placeholder="Ex: Mercado, Xerox da Faculdade..." class="w-full input-obsidian rounded-lg p-2.5 text-sm">
+                </div>
+                <div class="flex gap-2.5">
+                    <button type="button" onclick="app.closeModal('listModal')" class="flex-1 btn-secondary py-2 rounded-lg text-sm">Cancelar</button>
+                    <button type="submit" class="flex-1 btn-primary py-2 rounded-lg text-sm font-semibold">Salvar</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Modal: Criar / Editar Projeto -->
+    <div id="projectModal" class="hidden fixed inset-0 bg-black/80 backdrop-blur-sm z-50 flex items-center justify-center p-4" onclick="if(event.target === this) app.closeModal('projectModal')">
+        <div class="bg-[#252525] border border-[#3a3a3a] rounded-2xl w-full max-w-md p-5 shadow-2xl">
+            <h3 id="projectModalTitle" class="text-base font-bold text-white mb-4">Novo Projeto Ativo</h3>
+            <form onsubmit="app.saveProject(event)" class="space-y-3.5">
+                <input type="hidden" id="projId">
+                <div>
+                    <label class="block text-xs text-[#8b949e] mb-1">Nome do Projeto *</label>
+                    <input type="text" id="projName" required placeholder="Ex: O Arquivista, Last Ride" class="w-full input-obsidian rounded-lg p-2.5 text-sm">
+                </div>
+                <div>
+                    <label class="block text-xs text-[#8b949e] mb-1">Descrição</label>
+                    <textarea id="projDesc" rows="2" placeholder="Objetivo principal do projeto..." class="w-full input-obsidian rounded-lg p-2.5 text-sm resize-y"></textarea>
+                </div>
+                <div class="grid grid-cols-2 gap-3">
+                    <div>
+                        <label class="block text-xs text-[#8b949e] mb-1">Status</label>
+                        <select id="projStatus" class="w-full input-obsidian rounded-lg p-2.5 text-sm">
+                            <option value="Ativo">Ativo</option>
+                            <option value="Pausado">Pausado</option>
+                            <option value="Concluído">Concluído</option>
+                        </select>
+                    </div>
+                    <div>
+                        <label class="block text-xs text-[#8b949e] mb-1">Cor de Destaque</label>
+                        <select id="projColor" class="w-full input-obsidian rounded-lg p-2.5 text-sm">
+                            <option value="#7852ee">Roxo Obsidian</option>
+                            <option value="#10b981">Esmeralda</option>
+                            <option value="#f59e0b">Âmbar</option>
+                            <option value="#38bdf8">Azul Céu</option>
+                            <option value="#f43f5e">Rosa / Coral</option>
+                        </select>
+                    </div>
+                </div>
+                <div class="flex gap-2.5 pt-2">
+                    <button type="button" onclick="app.closeModal('projectModal')" class="flex-1 btn-secondary py-2 rounded-lg text-sm">Cancelar</button>
+                    <button type="submit" class="flex-1 btn-primary py-2 rounded-lg text-sm font-semibold">Salvar Projeto</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Modal: Criar / Editar Compromisso (Calendário) -->
+    <div id="eventModal" class="hidden fixed inset-0 bg-black/80 backdrop-blur-sm z-50 flex items-center justify-center p-4" onclick="if(event.target === this) app.closeModal('eventModal')">
+        <div class="bg-[#252525] border border-[#3a3a3a] rounded-2xl w-full max-w-md p-5 shadow-2xl">
+            <h3 id="eventModalTitle" class="text-base font-bold text-white mb-4">Novo Compromisso</h3>
+            <form onsubmit="app.saveEvent(event)" class="space-y-3.5">
+                <input type="hidden" id="evId">
+                <div>
+                    <label class="block text-xs text-[#8b949e] mb-1">Título *</label>
+                    <input type="text" id="evTitle" required placeholder="Ex: Sessão de RPG, Prova da Faculdade" class="w-full input-obsidian rounded-lg p-2.5 text-sm">
+                </div>
+                <div class="grid grid-cols-2 gap-3">
+                    <div>
+                        <label class="block text-xs text-[#8b949e] mb-1">Data *</label>
+                        <input type="date" id="evDate" required class="w-full input-obsidian rounded-lg p-2 text-sm mono">
+                    </div>
+                    <div>
+                        <label class="block text-xs text-[#8b949e] mb-1">Horário (Opcional)</label>
+                        <input type="time" id="evTime" class="w-full input-obsidian rounded-lg p-2 text-sm mono">
+                    </div>
+                </div>
+                <div>
+                    <label class="block text-xs text-[#8b949e] mb-1">Categoria / Cor</label>
+                    <select id="evColor" class="w-full input-obsidian rounded-lg p-2.5 text-sm">
+                        <option value="#7852ee">Roxo — Geral / Projetos</option>
+                        <option value="#f59e0b">Âmbar — RPG / Lazer</option>
+                        <option value="#38bdf8">Azul — Faculdade / Estudos</option>
+                        <option value="#10b981">Verde — Pessoal / Saúde</option>
+                        <option value="#f43f5e">Vermelho — Prazo / Urgente</option>
+                    </select>
+                </div>
+                <div>
+                    <label class="block text-xs text-[#8b949e] mb-1">Observação</label>
+                    <textarea id="evNotes" rows="3" placeholder="Detalhes, local ou lembrete..." class="w-full input-obsidian rounded-lg p-2.5 text-sm resize-y"></textarea>
+                </div>
+                <div class="flex gap-2.5 pt-2">
+                    <button type="button" onclick="app.closeModal('eventModal')" class="flex-1 btn-secondary py-2 rounded-lg text-sm">Cancelar</button>
+                    <button type="submit" class="flex-1 btn-primary py-2 rounded-lg text-sm font-semibold">Salvar Evento</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Modal: Criar / Editar Leitura -->
+    <div id="readingModal" class="hidden fixed inset-0 bg-black/80 backdrop-blur-sm z-50 flex items-center justify-center p-4" onclick="if(event.target === this) app.closeModal('readingModal')">
+        <div class="bg-[#252525] border border-[#3a3a3a] rounded-2xl w-full max-w-md p-5 shadow-2xl">
+            <h3 id="readingModalTitle" class="text-base font-bold text-white mb-4">Nova Obra</h3>
+            <form onsubmit="app.saveReading(event)" class="space-y-3.5">
+                <input type="hidden" id="rdId">
+                <div>
+                    <label class="block text-xs text-[#8b949e] mb-1">Título *</label>
+                    <input type="text" id="rdTitle" required placeholder="Ex: Vagabond, Berserk, Duna..." class="w-full input-obsidian rounded-lg p-2.5 text-sm">
+                </div>
+                <div class="grid grid-cols-3 gap-2.5">
+                    <div>
+                        <label class="block text-xs text-[#8b949e] mb-1">Tipo</label>
+                        <select id="rdType" onchange="app.autoSuggestReadingUnit()" class="w-full input-obsidian rounded-lg p-2 text-xs sm:text-sm">
+                            <option value="Livro">Livro</option>
+                            <option value="Mangá">Mangá</option>
+                            <option value="HQ">HQ</option>
+                        </select>
+                    </div>
+                    <div>
+                        <label class="block text-xs text-[#8b949e] mb-1">Unidade</label>
+                        <select id="rdUnit" class="w-full input-obsidian rounded-lg p-2 text-xs sm:text-sm">
+                            <option value="Páginas">Páginas</option>
+                            <option value="Capítulos">Capítulos</option>
+                        </select>
+                    </div>
+                    <div>
+                        <label class="block text-xs text-[#8b949e] mb-1">Status</label>
+                        <select id="rdStatus" class="w-full input-obsidian rounded-lg p-2 text-xs sm:text-sm">
+                            <option value="Lendo">Lendo</option>
+                            <option value="Quero Ler">Quero Ler</option>
+                            <option value="Pausado">Pausado</option>
+                            <option value="Concluído">Concluído</option>
+                        </select>
+                    </div>
+                </div>
+                <div class="grid grid-cols-2 gap-3">
+                    <div>
+                        <label class="block text-xs text-[#8b949e] mb-1">Progresso Atual</label>
+                        <input type="number" id="rdCurrent" min="0" value="0" class="w-full input-obsidian rounded-lg p-2.5 text-sm mono">
+                    </div>
+                    <div>
+                        <label class="block text-xs text-[#8b949e] mb-1">Total (Opcional)</label>
+                        <input type="number" id="rdTotal" min="0" placeholder="Ex: 320" class="w-full input-obsidian rounded-lg p-2.5 text-sm mono">
+                    </div>
+                </div>
+                <div class="flex gap-2.5 pt-2">
+                    <button type="button" onclick="app.closeModal('readingModal')" class="flex-1 btn-secondary py-2 rounded-lg text-sm">Cancelar</button>
+                    <button type="submit" class="flex-1 btn-primary py-2 rounded-lg text-sm font-semibold">Salvar Obra</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Modal: Nuvem Firebase & Backup (SEM LOGIN DO GOOGLE) -->
+    <div id="cloudModal" class="hidden fixed inset-0 bg-black/80 backdrop-blur-sm z-50 flex items-center justify-center p-3 sm:p-4" onclick="if(event.target === this) app.closeModal('cloudModal')">
+        <div class="bg-[#252525] border border-[#3a3a3a] rounded-2xl w-full max-w-xl p-5 shadow-2xl max-h-[92dvh] overflow-y-auto space-y-5">
+            <div class="flex items-center justify-between border-b border-[#333333] pb-3">
+                <div class="flex items-center gap-2.5">
+                    <svg class="w-5 h-5 text-[#a388fa]" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 15a4 4 0 004 4h9a5 5 0 10-.1-9.999 5.002 5.002 0 10-9.78 2.096A4.001 4.001 0 003 15z"></path></svg>
+                    <div>
+                        <h3 class="text-base font-bold text-white leading-tight">Nuvem Firebase & Backup</h3>
+                        <p class="text-[11px] text-[#8b949e] mono">Projeto: warhammer-e3ea0</p>
+                    </div>
+                </div>
+                <button onclick="app.closeModal('cloudModal')" class="text-gray-400 hover:text-white p-1">✕</button>
+            </div>
+
+            <!-- Banner de Status em Tempo Real -->
+            <div class="bg-[#1a1a1a] border border-[#333333] rounded-xl p-3.5 flex flex-wrap items-center justify-between gap-3">
+                <div class="flex items-center gap-2.5 min-w-0 flex-1">
+                    <span id="syncDotModal" class="w-3 h-3 rounded-full bg-amber-400 shrink-0"></span>
+                    <div class="min-w-0">
+                        <div id="syncModalStatusText" class="text-xs sm:text-sm font-semibold text-white">Sincronizando...</div>
+                        <div id="syncModalSubText" class="text-[11px] text-[#8b949e] break-words">Conectando ao Firestore...</div>
+                    </div>
+                </div>
+                <button id="btnForcePush" onclick="app.forcePushToCloud()" class="btn-secondary px-3 py-1.5 rounded-lg text-xs font-semibold shrink-0">
+                    Forçar Envio para Nuvem
+                </button>
+            </div>
+
+            <!-- Chave Secreta de Sincronização (Sync Key) -->
+            <form onsubmit="app.saveSyncKey(event)" class="space-y-3">
+                <div>
+                    <label class="block text-xs font-medium text-gray-200 mb-1">Chave Secreta de Sincronização (Sync Key)</label>
+                    <div class="flex flex-col sm:flex-row gap-2">
+                        <input type="text" id="fbSyncKey" required oninput="app.updateFirestoreRulesPreview()" placeholder="Ex: meu-hub-2026" class="flex-1 input-obsidian rounded-lg p-2.5 text-sm mono text-[#a388fa]">
+                        <button type="submit" class="btn-primary px-4 py-2.5 rounded-lg text-xs sm:text-sm font-semibold shrink-0">
+                            Salvar Chave
+                        </button>
+                    </div>
+                    <p class="text-[11px] text-[#8b949e] mt-1.5">Use a mesma chave no PC e no celular. Os dados ficam sincronizados em <code class="mono text-gray-300">hubs/&lt;sua-chave&gt;</code> com cache offline local.</p>
+                </div>
+            </form>
+
+            <!-- Bloco Pronto para Copiar das Regras do Firestore -->
+            <div class="bg-[#1a1a1a] border border-[#333333] rounded-xl p-3.5 space-y-2">
+                <div class="flex items-center justify-between gap-2">
+                    <span class="text-xs font-semibold text-gray-200">Regras do Firestore (Console → Firestore → Rules)</span>
+                    <button type="button" onclick="app.copyFirestoreRules()" class="btn-secondary px-2.5 py-1 rounded-lg text-[11px] font-semibold">Copiar Regras</button>
+                </div>
+                <pre id="firestoreRulesCode" class="text-[11px] mono text-[#a388fa] bg-[#141414] border border-[#2d2d2d] rounded-lg p-2.5 overflow-x-auto leading-relaxed"></pre>
+            </div>
+
+            <!-- Backup JSON Manual (Exportar & Importar) -->
+            <div class="pt-3 border-t border-[#333333] space-y-2">
+                <div class="text-xs font-semibold text-gray-200">Backup Manual em Arquivo (.json)</div>
+                <p class="text-[11px] text-[#8b949e]">Compatível com o backup completo do Hub e também com backups antigos contendo apenas o array de post-its do Kanban.</p>
+                <div class="grid grid-cols-2 gap-2.5 pt-1">
+                    <button type="button" onclick="app.exportFullBackup()" class="btn-secondary py-2.5 rounded-xl text-xs font-semibold flex items-center justify-center gap-1.5">
+                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"></path></svg>
+                        Exportar JSON
+                    </button>
+                    <label class="btn-secondary py-2.5 rounded-xl text-xs font-semibold flex items-center justify-center gap-1.5 cursor-pointer">
+                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-8l-4-4m0 0L8 8m4-4v12"></path></svg>
+                        Importar JSON
+                        <input type="file" accept=".json" class="hidden" onchange="app.importFullBackup(event)">
+                    </label>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal Reutilizável de Confirmação -->
+    <div id="confirmModal" class="hidden fixed inset-0 bg-black/80 backdrop-blur-sm z-[60] flex items-center justify-center p-4" onclick="if(event.target === this) app.closeConfirm()">
+        <div class="bg-[#252525] border border-[#3a3a3a] rounded-2xl w-full max-w-sm p-5 shadow-2xl space-y-4">
+            <h3 id="confirmModalTitle" class="text-base font-bold text-white">Confirmar ação</h3>
+            <p id="confirmModalMessage" class="text-sm text-[#8b949e]"></p>
+            <div class="flex gap-2.5 pt-1">
+                <button onclick="app.closeConfirm()" class="flex-1 btn-secondary py-2 rounded-lg text-sm">Cancelar</button>
+                <button id="confirmModalBtn" class="flex-1 bg-red-600 hover:bg-red-700 text-white py-2 rounded-lg text-sm font-semibold transition-colors">Confirmar</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Container de Toasts -->
+    <div id="toastContainer" class="fixed top-4 right-4 z-[70] flex flex-col gap-2 pointer-events-none max-w-xs w-full"></div>
+
+    <!-- =========================================================
+         SCRIPT PRINCIPAL + FIREBASE FIRESTORE v11 (SEM AUTH)
+         ========================================================= -->
+    <script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/11.0.2/firebase-app.js";
+        import { getFirestore, doc, setDoc, onSnapshot } from "https://www.gstatic.com/firebasejs/11.0.2/firebase-firestore.js";
+
+        // =========================================================
+        // CONFIGURAÇÃO DO FIREBASE (EMBUTIDA NO CÓDIGO)
+        // =========================================================
+        const firebaseConfig = {
+          apiKey: "AIzaSyCyqqrqseASLA-9diZ8EgzIT0DKSFwL-s8",
+          authDomain: "warhammer-e3ea0.firebaseapp.com",
+          projectId: "warhammer-e3ea0",
+          storageBucket: "warhammer-e3ea0.firebasestorage.app",
+          messagingSenderId: "1079297489728",
+          appId: "1:1079297489728:web:beee66110ad01c44a9d8a5"
+        };
+
+        const firebaseApp = initializeApp(firebaseConfig);
+        const db = getFirestore(firebaseApp);
+
+        // Chave secreta padrão e chaves do localStorage
+        const DEFAULT_SYNC_KEY = "meu-hub-2026";
+        const STORAGE_DATA_KEY = "kanban_hub_data_v3";
+        const STORAGE_SYNC_KEY = "kanban_hub_sync_key_v3";
+
+        // =========================================================
+        // 1. DEFINIÇÃO DOS 7 MÓDULOS
+        // =========================================================
+        const MODULES = [
+            {
+                id: 'kanban',
+                name: 'Quadro Kanban',
+                shortName: 'Kanban',
+                subtitle: 'Índice digital dos seus post-its físicos',
+                icon: `<svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 17V7m0 10a2 2 0 01-2 2H5a2 2 0 01-2-2V7a2 2 0 012-2h2a2 2 0 012 2m0 10a2 2 0 002 2h2a2 2 0 002-2M9 7a2 2 0 012-2h2a2 2 0 012 2m0 10V7m0 10a2 2 0 002 2h2a2 2 0 002-2V7a2 2 0 00-2-2h-2a2 2 0 00-2 2"></path></svg>`
+            },
+            {
+                id: 'ideas',
+                name: 'Ideias Aleatórias',
+                shortName: 'Ideias',
+                subtitle: 'Captura rápida de ideias com conversão para Post-it',
+                icon: `<svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9.663 17h4.673M12 3v1m6.364 1.636l-.707.707M21 12h-1M4 12H3m3.343-5.657l-.707-.707m2.828 9.9a5 5 0 117.072 0l-.548.547A3.374 3.374 0 0014 18.469V19a2 2 0 11-4 0v-.531c0-.895-.356-1.754-.988-2.386l-.548-.547z"></path></svg>`
+            },
+            {
+                id: 'links',
+                name: 'Links & Redes',
+                shortName: 'Links',
+                subtitle: 'TikTok, Instagram, YouTube, X e referências salvas',
+                icon: `<svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13.828 10.172a4 4 0 00-5.656 0l-4 4a4 4 0 105.656 5.656l1.102-1.101m-.758-4.899a4 4 0 005.656 0l4-4a4 4 0 00-5.656-5.656l-1.1 1.1"></path></svg>`
+            },
+            {
+                id: 'lists',
+                name: 'Listas & Checklists',
+                shortName: 'Listas',
+                subtitle: 'Mercado, xerox da faculdade e checklists rápidos',
+                icon: `<svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-6 9l2 2 4-4"></path></svg>`
+            },
+            {
+                id: 'projects',
+                name: 'Projetos Ativos',
+                shortName: 'Projetos',
+                subtitle: 'Roadmap e funcionalidades planejadas por projeto',
+                icon: `<svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 7v10a2 2 0 002 2h14a2 2 0 002-2V9a2 2 0 00-2-2h-6l-2-2H5a2 2 0 00-2 2z"></path></svg>`
+            },
+            {
+                id: 'calendar',
+                name: 'Calendário',
+                shortName: 'Agenda',
+                subtitle: 'Compromissos, sessões de RPG e prazos do mês',
+                icon: `<svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"></path></svg>`
+            },
+            {
+                id: 'readings',
+                name: 'Leituras',
+                shortName: 'Leituras',
+                subtitle: 'Controle de páginas e capítulos de livros, mangás e HQs',
+                icon: `<svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253"></path></svg>`
+            }
+        ];
+
+        // =========================================================
+        // 2. ESTADO DA APLICAÇÃO (UI + DADOS PERSISTIDOS)
+        // =========================================================
+        const ui = {
+            activeModule: 'kanban',
+            kanbanViewMode: window.innerWidth < 768 ? 'list' : 'canvas',
+            currentZoom: 1,
+            linkingSourceId: null,
+            selectedIdeaTag: 'all',
+            selectedLinkPlatform: 'all',
+            activeListId: null,
+            activeProjectId: null,
+            calendarYear: new Date().getFullYear(),
+            calendarMonth: new Date().getMonth(),
+            selectedDateStr: toDateStr(new Date())
+        };
+
+        // Dados sincronizados (localStorage + Firestore)
+        let dataState = {
+            kanban: [],
+            ideas: [],
+            links: [],
+            lists: [],
+            projects: [],
+            events: [],
+            readings: [],
+            updatedAt: 0
+        };
+
+        // Variáveis de controle do Firebase
+        let fbUnsubscribe = null;
+        let activeSyncKey = "";
+        let isCloudConnected = false;
+        let syncDebounceTimer = null;
+        let confirmCallback = null;
+
+        // =========================================================
+        // 3. UTILITÁRIOS
+        // =========================================================
+        function generateId(prefix = 'id') {
+            return `${prefix}_${Date.now().toString(36)}_${Math.random().toString(36).slice(2, 7)}`;
+        }
+
+        function escapeHtml(str) {
+            if (str === null || str === undefined) return '';
+            return String(str)
+                .replace(/&/g, '&amp;')
+                .replace(/</g, '&lt;')
+                .replace(/>/g, '&gt;')
+                .replace(/"/g, '&quot;')
+                .replace(/'/g, '&#39;');
+        }
+
+        function toDateStr(dateObj) {
+            const y = dateObj.getFullYear();
+            const m = String(dateObj.getMonth() + 1).padStart(2, '0');
+            const d = String(dateObj.getDate()).padStart(2, '0');
+            return `${y}-${m}-${d}`;
+        }
+
+        function formatDateBR(dateStr) {
+            if (!dateStr) return '';
+            const [y, m, d] = dateStr.split('-').map(Number);
+            const dt = new Date(y, m - 1, d);
+            return dt.toLocaleDateString('pt-BR', { weekday: 'long', day: 'numeric', month: 'long', year: 'numeric' });
+        }
+
+        function copyTextFallback(text) {
+            const ta = document.createElement('textarea');
+            ta.value = text;
+            ta.style.position = 'fixed';
+            ta.style.opacity = '0';
+            document.body.appendChild(ta);
+            ta.focus();
+            ta.select();
+            let ok = false;
+            try {
+                ok = document.execCommand('copy');
+            } catch (_) {
+                ok = false;
+            }
+            ta.remove();
+            return ok;
+        }
+
+        function showToast(message, type = 'info') {
+            const container = document.getElementById('toastContainer');
+            const el = document.createElement('div');
+            const colors = {
+                success: 'border-emerald-500/60 bg-[#222825] text-emerald-200',
+                error: 'border-red-500/60 bg-[#2a2020] text-red-200',
+                info: 'border-[#7852ee]/60 bg-[#252525] text-gray-100'
+            };
+            el.className = `pointer-events-auto border rounded-xl px-4 py-2.5 text-xs sm:text-sm shadow-xl flex items-center gap-2 animate-slide-up ${colors[type] || colors.info}`;
+            el.innerHTML = `<span class="flex-1">${escapeHtml(message)}</span>`;
+            container.appendChild(el);
+            setTimeout(() => {
+                el.style.opacity = '0';
+                el.style.transition = 'opacity 0.25s ease';
+                setTimeout(() => el.remove(), 260);
+            }, 3000);
+        }
+
+        // =========================================================
+        // 4. DADOS INICIAIS (APENAS SE O STORAGE ESTIVER VAZIO)
+        // =========================================================
+        function buildSeedData() {
+            const today = toDateStr(new Date());
+            return {
+                kanban: [
+                    { id: 'seed_lr01', code: 'LR-01', title: 'Mexer no Last Ride', tag: 'LastRide', desc: 'Desenvolvimento principal no Godot e polimento das mecânicas.', status: 'doing', timestamp: Date.now(), x: 80, y: 80, links: ['seed_arq02'] },
+                    { id: 'seed_arq02', code: 'ARQ-02', title: 'Cartas Arquivista', tag: 'Arquivista', desc: 'Gerador e layout visual das cartas/cápsulas.', status: 'todo', timestamp: Date.now() - 1000, x: 460, y: 120, links: [] },
+                    { id: 'seed_dev01', code: 'DEV-01', title: 'Arrumar kanban', tag: 'Dev', desc: 'Configurar a sincronização do Companion Hub no PC e no celular.', status: 'done', timestamp: Date.now() - 2000, x: 80, y: 360, links: [] }
+                ],
+                ideas: [
+                    { id: 'seed_i1', title: 'Atalho rápido de foco', text: 'Usar o botão Sortear no Kanban sempre que travar para começar uma tarefa.', tags: ['TDAH', 'Produtividade'], pinned: true, createdAt: Date.now() }
+                ],
+                links: [
+                    { id: 'seed_lk1', url: 'https://www.youtube.com/watch?v=dQw4w9WgXcQ', title: 'Referência de UI estilo Metro para agenda', category: 'Design', tags: ['ui', 'metro'], platform: 'YouTube', watched: false, createdAt: Date.now() }
+                ],
+                lists: [
+                    {
+                        id: 'seed_l1',
+                        name: 'Mercado',
+                        createdAt: Date.now(),
+                        items: [
+                            { id: generateId('li'), text: 'Café em pó', done: false },
+                            { id: generateId('li'), text: 'Leite', done: false },
+                            { id: generateId('li'), text: 'Pão de forma', done: true }
+                        ]
+                    },
+                    {
+                        id: 'seed_l2',
+                        name: 'Xerox da Faculdade',
+                        createdAt: Date.now() - 500,
+                        items: [
+                            { id: generateId('li'), text: 'Imprimir fichas do RPG de sexta', done: false },
+                            { id: generateId('li'), text: 'Mapa da mesa em folha A3', done: false }
+                        ]
+                    }
+                ],
+                projects: [
+                    {
+                        id: 'seed_p1',
+                        name: 'O Arquivista',
+                        desc: 'Ferramenta VTT e controle de itens e cartas para Ordem Paranormal.',
+                        color: '#7852ee',
+                        status: 'Ativo',
+                        createdAt: Date.now(),
+                        features: [
+                            { id: generateId('ft'), title: 'Sistema de inventário de itens', priority: 'Alta', done: false },
+                            { id: generateId('ft'), title: 'Layout visual das cartas/cápsulas', priority: 'Média', done: false }
+                        ]
+                    },
+                    {
+                        id: 'seed_p2',
+                        name: 'Kanban Companion',
+                        desc: 'Central pessoal estilo Obsidian com sincronização PC e celular.',
+                        color: '#10b981',
+                        status: 'Ativo',
+                        createdAt: Date.now() - 500,
+                        features: [
+                            { id: generateId('ft'), title: 'Arrastar e soltar por toque no celular', priority: 'Alta', done: true },
+                            { id: generateId('ft'), title: 'Sincronização Firestore sem login', priority: 'Alta', done: true },
+                            { id: generateId('ft'), title: 'Tema compacto para telas menores', priority: 'Baixa', done: false }
+                        ]
+                    }
+                ],
+                events: [
+                    { id: 'seed_ev1', title: 'RPG de quinta', date: today, time: '19:30', color: '#f59e0b', notes: 'Conferir fichas e dados antes da sessão.' }
+                ],
+                readings: [
+                    { id: 'seed_rd1', title: 'Vagabond', type: 'Mangá', unit: 'Capítulos', status: 'Lendo', current: 42, total: 327, updatedAt: Date.now() }
+                ],
+                updatedAt: Date.now()
+            };
+        }
+
+        function normalizeDataState(raw) {
+            const safe = raw && typeof raw === 'object' ? raw : {};
+            return {
+                kanban: Array.isArray(safe.kanban) ? safe.kanban : [],
+                ideas: Array.isArray(safe.ideas) ? safe.ideas : [],
+                links: Array.isArray(safe.links) ? safe.links : [],
+                lists: Array.isArray(safe.lists) ? safe.lists : [],
+                projects: Array.isArray(safe.projects) ? safe.projects : [],
+                events: Array.isArray(safe.events) ? safe.events : [],
+                readings: Array.isArray(safe.readings) ? safe.readings : [],
+                updatedAt: Number(safe.updatedAt || Date.now())
+            };
+        }
+
+        function loadLocalData() {
+            try {
+                const stored = localStorage.getItem(STORAGE_DATA_KEY);
+                if (stored) {
+                    dataState = normalizeDataState(JSON.parse(stored));
+                    return;
+                }
+                // Compatibilidade com storage antigo do Kanban Companion, se existir
+                const legacyKanban = localStorage.getItem('kanban_index_data');
+                if (legacyKanban) {
+                    const parsedLegacy = JSON.parse(legacyKanban);
+                    const seed = buildSeedData();
+                    if (Array.isArray(parsedLegacy) && parsedLegacy.length > 0) {
+                        seed.kanban = parsedLegacy;
+                    }
+                    dataState = seed;
+                    localStorage.setItem(STORAGE_DATA_KEY, JSON.stringify(dataState));
+                    return;
+                }
+            } catch (err) {
+                console.warn('Erro ao ler localStorage:', err);
+            }
+            dataState = buildSeedData();
+            localStorage.setItem(STORAGE_DATA_KEY, JSON.stringify(dataState));
+        }
+
+        // =========================================================
+        // 5. PERSISTÊNCIA LOCAL + SINCRONIZAÇÃO FIREBASE (DEBOUNCE 500ms)
+        // =========================================================
+        function updateCloudStatusUI(mode, detailText = '') {
+            const dotD = document.getElementById('syncDotDesktop');
+            const lblD = document.getElementById('syncLabelDesktop');
+            const dotM = document.getElementById('syncDotMobile');
+            const lblM = document.getElementById('syncLabelMobile');
+            const dotModal = document.getElementById('syncDotModal');
+            const statusModal = document.getElementById('syncModalStatusText');
+            const subModal = document.getElementById('syncModalSubText');
+
+            let dotClass = 'bg-[#8b949e]';
+            let shortDesktop = 'Offline';
+            let shortMobile = 'Offline';
+            let modalTitle = 'Offline';
+            let modalSub = detailText || 'Sem conexão com a internet. Alterações salvas localmente no navegador.';
+
+            if (mode === 'connected') {
+                dotClass = 'bg-emerald-400';
+                shortDesktop = 'Sincronizado';
+                shortMobile = 'Sync OK';
+                modalTitle = 'Sincronizado';
+                modalSub = detailText || `Tempo real ativo em hubs/${activeSyncKey}`;
+            } else if (mode === 'syncing') {
+                dotClass = 'bg-amber-400 animate-pulse';
+                shortDesktop = 'Sincronizando...';
+                shortMobile = 'Sync...';
+                modalTitle = 'Sincronizando...';
+                modalSub = detailText || 'Comunicando com o Firestore...';
+            } else if (mode === 'error') {
+                dotClass = 'bg-red-500';
+                shortDesktop = 'Erro de Permissão';
+                shortMobile = 'Erro';
+                modalTitle = 'Erro de Permissão';
+                modalSub = detailText || 'Publique as Regras do Firestore abaixo com a sua chave secreta.';
+            }
+
+            if (dotD) dotD.className = `w-2.5 h-2.5 rounded-full shrink-0 ${dotClass}`;
+            if (lblD) lblD.textContent = shortDesktop;
+            if (dotM) dotM.className = `w-2 h-2 rounded-full ${dotClass}`;
+            if (lblM) lblM.textContent = shortMobile;
+            if (dotModal) dotModal.className = `w-3 h-3 rounded-full shrink-0 ${dotClass}`;
+            if (statusModal) statusModal.textContent = modalTitle;
+            if (subModal) subModal.textContent = modalSub;
+        }
+
+        function saveState(skipCloudPush = false) {
+            dataState.updatedAt = Date.now();
+            try {
+                localStorage.setItem(STORAGE_DATA_KEY, JSON.stringify(dataState));
+            } catch (err) {
+                console.error('Erro ao salvar no localStorage:', err);
+                showToast('Espaço local cheio ao salvar dados.', 'error');
+            }
+
+            if (!skipCloudPush && activeSyncKey) {
+                if (!navigator.onLine) {
+                    updateCloudStatusUI('offline');
+                    return;
+                }
+                if (isCloudConnected) {
+                    scheduleCloudSync();
+                }
+            }
+        }
+
+        function scheduleCloudSync() {
+            if (syncDebounceTimer) clearTimeout(syncDebounceTimer);
+            updateCloudStatusUI('syncing', 'Salvando alterações na nuvem...');
+            syncDebounceTimer = setTimeout(async () => {
+                await pushStateToFirestore(false);
+            }, 500);
+        }
+
+        async function pushStateToFirestore(showSuccessToast = false) {
+            if (!activeSyncKey) return;
+            if (!navigator.onLine) {
+                updateCloudStatusUI('offline');
+                if (showSuccessToast) showToast('Você está offline. Os dados foram mantidos no cache local.', 'info');
+                return;
+            }
+            try {
+                updateCloudStatusUI('syncing', 'Enviando dados para o Firestore...');
+                const docRef = doc(db, 'hubs', activeSyncKey);
+                await setDoc(docRef, {
+                    ...dataState,
+                    updatedAt: Date.now()
+                }, { merge: true });
+                isCloudConnected = true;
+                updateCloudStatusUI('connected');
+                if (showSuccessToast) showToast('Dados enviados para o Firebase!', 'success');
+            } catch (err) {
+                console.error('Erro ao gravar no Firestore:', err);
+                const isPerm = err?.code === 'permission-denied';
+                updateCloudStatusUI(
+                    'error',
+                    isPerm
+                        ? `Permissão negada em hubs/${activeSyncKey}. Publique as regras abaixo no Firebase Console.`
+                        : `Falha ao salvar: ${err.code || err.message}`
+                );
+                if (showSuccessToast) {
+                    showToast(isPerm ? 'Erro de permissão! Publique as Regras no Firestore.' : 'Erro ao enviar para a nuvem.', 'error');
+                }
+            }
+        }
+
+        function getStoredSyncKey() {
+            try {
+                const saved = localStorage.getItem(STORAGE_SYNC_KEY);
+                return (saved && saved.trim()) ? saved.trim() : DEFAULT_SYNC_KEY;
+            } catch (_) {
+                return DEFAULT_SYNC_KEY;
+            }
+        }
+
+        function connectToFirebase(syncKey, silent = false, isKeySwitch = false) {
+            const cleanKey = (syncKey || DEFAULT_SYNC_KEY).trim();
+            if (!cleanKey) return;
+
+            if (fbUnsubscribe) {
+                fbUnsubscribe();
+                fbUnsubscribe = null;
+            }
+
+            activeSyncKey = cleanKey;
+            try {
+                localStorage.setItem(STORAGE_SYNC_KEY, activeSyncKey);
+            } catch (_) {}
+
+            if (!navigator.onLine) {
+                isCloudConnected = false;
+                updateCloudStatusUI('offline');
+            } else {
+                updateCloudStatusUI('syncing', `Conectando a hubs/${activeSyncKey}...`);
+            }
+
+            let pendingSwitchPull = isKeySwitch;
+            const docRef = doc(db, 'hubs', activeSyncKey);
+
+            fbUnsubscribe = onSnapshot(
+                docRef,
+                (snap) => {
+                    isCloudConnected = true;
+                    updateCloudStatusUI(navigator.onLine ? 'connected' : 'offline');
+
+                    // Ignora o eco da própria escrita local para não piscar a tela
+                    if (snap.metadata.hasPendingWrites) return;
+
+                    if (snap.exists()) {
+                        const cloudData = normalizeDataState(snap.data());
+                        if (pendingSwitchPull || (cloudData.updatedAt || 0) >= (dataState.updatedAt || 0) || !dataState.updatedAt) {
+                            dataState = cloudData;
+                            try {
+                                localStorage.setItem(STORAGE_DATA_KEY, JSON.stringify(dataState));
+                            } catch (_) {}
+                            renderAll();
+                        }
+                        pendingSwitchPull = false;
+                    } else {
+                        pendingSwitchPull = false;
+                        // Documento ainda não existe nessa chave: cria na nuvem com o estado local
+                        pushStateToFirestore(false);
+                    }
+                },
+                (err) => {
+                    console.error('Erro no onSnapshot do Firestore:', err);
+                    isCloudConnected = false;
+                    const isPerm = err?.code === 'permission-denied';
+                    updateCloudStatusUI(
+                        'error',
+                        isPerm
+                            ? `Permissão negada em hubs/${activeSyncKey}. Publique as regras abaixo no Console do Firebase.`
+                            : `Erro (${err.code || 'conexão'}): ${err.message}`
+                    );
+                    if (!silent) {
+                        showToast(isPerm ? 'Erro de permissão no Firestore. Verifique as regras.' : 'Erro ao conectar ao Firebase.', 'error');
+                    }
+                }
+            );
+
+            if (!silent && navigator.onLine) {
+                showToast(`Sincronizando com a chave "${activeSyncKey}"...`, 'info');
+            }
+        }
+
+        function updateFirestoreRulesPreview() {
+            const keyInput = document.getElementById('fbSyncKey')?.value.trim() || activeSyncKey || DEFAULT_SYNC_KEY;
+            const rulesText = `rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+    match /hubs/{chaveSecreta} {
+      allow get, create, update: if chaveSecreta == "${keyInput}";
+      allow list, delete: if false;
+    }
+  }
+}`;
+            const pre = document.getElementById('firestoreRulesCode');
+            if (pre) pre.textContent = rulesText;
+        }
+
+        // Atualiza status automaticamente ao perder ou recuperar internet
+        window.addEventListener('offline', () => {
+            updateCloudStatusUI('offline');
+        });
+        window.addEventListener('online', () => {
+            if (activeSyncKey) {
+                connectToFirebase(activeSyncKey, true, false);
+            }
+        });
+
+        // =========================================================
+        // 6. NAVEGAÇÃO & CABEÇALHO DINÂMICO
+        // =========================================================
+        function renderNavigation() {
+            const desktopNav = document.getElementById('desktopNav');
+            desktopNav.innerHTML = MODULES.map(m => `
+                <button onclick="app.switchModule('${m.id}')"
+                    class="w-full flex items-center gap-3 px-3 py-2.5 rounded-xl border border-transparent text-left transition-all text-sm font-medium ${ui.activeModule === m.id ? 'nav-item-active shadow-sm' : 'text-[#b5bac1] hover:bg-[#2d2d2d] hover:text-white'}">
+                    <span class="${ui.activeModule === m.id ? 'text-[#a388fa]' : 'text-[#8b949e]'} shrink-0">${m.icon}</span>
+                    <span class="truncate">${m.name}</span>
+                </button>
+            `).join('');
+
+            // Bottom nav mobile: 4 módulos principais + Mais
+            const mobilePrimaryIds = ['kanban', 'ideas', 'lists', 'calendar'];
+            const mobileNav = document.getElementById('mobileBottomNav');
+            const isExtraActive = !mobilePrimaryIds.includes(ui.activeModule);
+
+            mobileNav.innerHTML = mobilePrimaryIds.map(id => {
+                const m = MODULES.find(x => x.id === id);
+                const active = ui.activeModule === id;
+                return `
+                    <button onclick="app.switchModule('${m.id}')" class="flex flex-col items-center justify-center gap-0.5 rounded-lg transition-colors ${active ? 'text-[#a388fa]' : 'text-[#8b949e]'}">
+                        ${m.icon}
+                        <span class="text-[10px] font-medium leading-none mt-0.5">${m.shortName}</span>
+                    </button>
+                `;
+            }).join('') + `
+                <button onclick="app.openMobileMenu()" class="flex flex-col items-center justify-center gap-0.5 rounded-lg transition-colors ${isExtraActive ? 'text-[#a388fa]' : 'text-[#8b949e]'}">
+                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16m-7 6h7"></path></svg>
+                    <span class="text-[10px] font-medium leading-none mt-0.5">Mais</span>
+                </button>
+            `;
+
+            // Gaveta mobile (todos os 7 módulos)
+            const drawerGrid = document.getElementById('mobileDrawerGrid');
+            drawerGrid.innerHTML = MODULES.map(m => {
+                const active = ui.activeModule === m.id;
+                return `
+                    <button onclick="app.switchModule('${m.id}'); app.closeMobileMenu()"
+                        class="flex items-center gap-2.5 p-3 rounded-xl border text-left transition-colors ${active ? 'bg-[#7852ee]/20 border-[#7852ee] text-white' : 'bg-[#1a1a1a] border-[#333333] text-gray-300'}">
+                        <span class="${active ? 'text-[#a388fa]' : 'text-[#8b949e]'} shrink-0">${m.icon}</span>
+                        <span class="text-xs font-semibold truncate">${m.name}</span>
+                    </button>
+                `;
+            }).join('');
+        }
+
+        function updateHeaderForModule() {
+            const mod = MODULES.find(m => m.id === ui.activeModule) || MODULES[0];
+            document.getElementById('headerModuleIcon').innerHTML = mod.icon;
+            document.getElementById('headerModuleTitle').textContent = mod.name;
+            document.getElementById('headerModuleSubtitle').textContent = mod.subtitle;
+
+            const actions = document.getElementById('headerActions');
+            if (ui.activeModule === 'kanban') {
+                actions.innerHTML = `
+                    <button onclick="app.openRandomizer()" class="btn-secondary px-2.5 sm:px-3 py-1.5 rounded-lg text-xs font-semibold flex items-center gap-1.5" title="Sortear tarefa não concluída">
+                        <svg class="w-4 h-4 text-[#a388fa]" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19.428 15.428a2 2 0 00-1.022-.547l-2.387-.477a6 6 0 00-3.86.517l-.318.158a6 6 0 01-3.86.517L6.05 15.21a2 2 0 00-1.806.547M8 4h8l-1 1v5.172a2 2 0 00.586 1.414l5 5c1.26 1.26.367 3.414-1.415 3.414H4.828c-1.782 0-2.674-2.154-1.414-3.414l5-5A2 2 0 009 10.172V5L8 4z"></path></svg>
+                        <span class="hidden sm:inline">Sortear</span>
+                    </button>
+                    <button onclick="app.openKanbanForm()" class="btn-primary px-3 py-1.5 rounded-lg text-xs font-semibold flex items-center gap-1.5">
+                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"></path></svg>
+                        <span>Post-it</span>
+                    </button>
+                `;
+            } else if (ui.activeModule === 'projects') {
+                actions.innerHTML = `
+                    <button onclick="app.openProjectModal()" class="btn-primary px-3 py-1.5 rounded-lg text-xs font-semibold flex items-center gap-1.5">
+                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"></path></svg>
+                        Novo Projeto
+                    </button>
+                `;
+            } else if (ui.activeModule === 'calendar') {
+                actions.innerHTML = `
+                    <button onclick="app.openEventModal()" class="btn-primary px-3 py-1.5 rounded-lg text-xs font-semibold flex items-center gap-1.5">
+                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"></path></svg>
+                        Novo Evento
+                    </button>
+                `;
+            } else if (ui.activeModule === 'readings') {
+                actions.innerHTML = `
+                    <button onclick="app.openReadingModal()" class="btn-primary px-3 py-1.5 rounded-lg text-xs font-semibold flex items-center gap-1.5">
+                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"></path></svg>
+                        Nova Obra
+                    </button>
+                `;
+            } else {
+                actions.innerHTML = '';
+            }
+        }
+
+        function switchModule(moduleId) {
+            ui.activeModule = moduleId;
+            document.querySelectorAll('.module-view').forEach(sec => sec.classList.add('hidden'));
+            const activeEl = document.getElementById(`view-${moduleId}`);
+            if (activeEl) activeEl.classList.remove('hidden');
+
+            renderNavigation();
+            updateHeaderForModule();
+
+            if (moduleId === 'kanban') renderKanban();
+            else if (moduleId === 'ideas') renderIdeas();
+            else if (moduleId === 'links') renderLinks();
+            else if (moduleId === 'lists') renderLists();
+            else if (moduleId === 'projects') renderProjects();
+            else if (moduleId === 'calendar') renderCalendar();
+            else if (moduleId === 'readings') renderReadings();
+        }
+
+        // =========================================================
+        // 7. MÓDULO 1: QUADRO KANBAN (CANVAS + LISTA + POINTER D&D)
+        // =========================================================
+        function updateKanbanViewButtons() {
+            const btnCanvas = document.getElementById('btnModeCanvas');
+            const btnList = document.getElementById('btnModeList');
+            const canvasWrap = document.getElementById('kanbanCanvasWrapper');
+            const listWrap = document.getElementById('kanbanListWrapper');
+
+            if (ui.kanbanViewMode === 'canvas') {
+                btnCanvas.className = 'px-2.5 py-1 rounded-md text-xs font-semibold bg-[#7852ee] text-white flex items-center gap-1.5';
+                btnList.className = 'px-2.5 py-1 rounded-md text-xs font-medium text-[#8b949e] hover:text-white flex items-center gap-1.5';
+                canvasWrap.classList.remove('hidden');
+                listWrap.classList.add('hidden');
+            } else {
+                btnList.className = 'px-2.5 py-1 rounded-md text-xs font-semibold bg-[#7852ee] text-white flex items-center gap-1.5';
+                btnCanvas.className = 'px-2.5 py-1 rounded-md text-xs font-medium text-[#8b949e] hover:text-white flex items-center gap-1.5';
+                canvasWrap.classList.add('hidden');
+                listWrap.classList.remove('hidden');
+            }
+        }
+
+        function getKanbanStatusStyles(status) {
+            if (status === 'doing') {
+                return {
+                    border: 'border-l-4 border-l-amber-500 border-t border-r border-b border-[#333333]',
+                    opacity: ''
+                };
+            }
+            if (status === 'done') {
+                return {
+                    border: 'border-l-4 border-l-emerald-500 border-t border-r border-b border-[#333333]',
+                    opacity: 'opacity-50 hover:opacity-100'
+                };
+            }
+            return {
+                border: 'border-l-4 border-l-gray-500 border-t border-r border-b border-[#333333]',
+                opacity: ''
+            };
+        }
+
+        function buildKanbanCardHTML(entry, isCanvas) {
+            const status = entry.status || 'todo';
+            const descHtml = entry.desc
+                ? escapeHtml(entry.desc).replace(/\n/g, '<br>')
+                : '<span class="italic text-[#666]">Sem detalhes adicionais.</span>';
+            const linksCount = (entry.links || []).length;
+
+            return `
+                <div class="${isCanvas ? 'drag-handle' : ''} bg-[#1a1a1a] px-3 py-2.5 border-b border-[#333333] flex justify-between items-center gap-2 rounded-t-xl">
+                    <div class="flex items-center gap-2 min-w-0">
+                        <span class="mono text-sm font-bold text-[#a388fa] bg-[#252525] px-2 py-0.5 rounded border border-[#3d3d3d] shrink-0">${escapeHtml(entry.code)}</span>
+                        ${linksCount > 0 ? `<span class="text-[10px] mono text-amber-400 bg-amber-500/10 border border-amber-500/30 px-1.5 py-0.5 rounded-full" title="${linksCount} ligação(ões)">⛓ ${linksCount}</span>` : ''}
+                    </div>
+                    ${entry.tag ? `<span class="tag-pill text-[11px] font-semibold px-2 py-0.5 rounded-full truncate max-w-[115px]">${escapeHtml(entry.tag)}</span>` : ''}
+                </div>
+                <div class="p-3.5 flex flex-col gap-2.5">
+                    <h3 class="text-sm font-semibold text-gray-100 leading-snug">${escapeHtml(entry.title)}</h3>
+                    <div class="text-xs text-[#9ca3af] max-h-40 overflow-y-auto pr-1 leading-relaxed">${descHtml}</div>
+                    <div class="pt-2.5 border-t border-[#333333] flex justify-between items-center gap-2">
+                        <select onchange="app.changeKanbanStatus('${entry.id}', this.value)" class="text-xs bg-[#1a1a1a] border border-[#3f3f3f] rounded-md px-2 py-1 text-gray-200 focus:outline-none focus:border-[#7852ee] cursor-pointer">
+                            <option value="todo" ${status === 'todo' ? 'selected' : ''}>A Fazer</option>
+                            <option value="doing" ${status === 'doing' ? 'selected' : ''}>Em Andamento</option>
+                            <option value="done" ${status === 'done' ? 'selected' : ''}>Concluído</option>
+                        </select>
+                        <div class="flex items-center gap-1">
+                            <button onclick="app.openKanbanLinkModal('${entry.id}')" class="p-1.5 text-[#8b949e] hover:text-amber-400 hover:bg-amber-500/10 rounded-lg transition-colors" title="Ligar dependências">
+                                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13.828 10.172a4 4 0 00-5.656 0l-4 4a4 4 0 105.656 5.656l1.102-1.101m-.758-4.899a4 4 0 005.656 0l4-4a4 4 0 00-5.656-5.656l-1.1 1.1"></path></svg>
+                            </button>
+                            <button onclick="app.openKanbanForm('${entry.id}')" class="p-1.5 text-[#8b949e] hover:text-white hover:bg-[#333333] rounded-lg transition-colors" title="Editar">
+                                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"></path></svg>
+                            </button>
+                            <button onclick="app.confirmDeleteKanban('${entry.id}')" class="p-1.5 text-[#8b949e] hover:text-[#f85149] hover:bg-red-500/10 rounded-lg transition-colors" title="Excluir">
+                                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"></path></svg>
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            `;
+        }
+
+        function renderKanban() {
+            updateKanbanViewButtons();
+            const search = (document.getElementById('kanbanSearch')?.value || '').trim().toLowerCase();
+            const statusFilter = document.getElementById('kanbanStatusFilter')?.value || 'all';
+
+            const filtered = dataState.kanban
+                .filter(e => {
+                    const matchStatus = statusFilter === 'all' || (e.status || 'todo') === statusFilter;
+                    const matchTerm = !search ||
+                        (e.code || '').toLowerCase().includes(search) ||
+                        (e.title || '').toLowerCase().includes(search) ||
+                        (e.tag || '').toLowerCase().includes(search) ||
+                        (e.desc || '').toLowerCase().includes(search);
+                    return matchStatus && matchTerm;
+                })
+                .sort((a, b) => (b.timestamp || 0) - (a.timestamp || 0));
+
+            if (ui.kanbanViewMode === 'canvas') {
+                const grid = document.getElementById('kanbanCanvasGrid');
+                const emptyEl = document.getElementById('kanbanEmptyCanvas');
+                grid.innerHTML = '';
+
+                if (filtered.length === 0) {
+                    emptyEl.classList.remove('hidden');
+                    emptyEl.classList.add('flex');
+                    document.getElementById('linksLayer').innerHTML = '';
+                    return;
+                }
+                emptyEl.classList.add('hidden');
+                emptyEl.classList.remove('flex');
+
+                filtered.forEach(entry => {
+                    const div = document.createElement('div');
+                    div.id = `card-${entry.id}`;
+                    const st = getKanbanStatusStyles(entry.status || 'todo');
+                    div.className = `kanban-card rounded-xl shadow-lg shadow-black/30 flex flex-col ${st.border} ${st.opacity}`;
+                    div.style.left = `${entry.x ?? 80}px`;
+                    div.style.top = `${entry.y ?? 80}px`;
+                    div.innerHTML = buildKanbanCardHTML(entry, true);
+
+                    attachPointerDrag(div, entry);
+                    grid.appendChild(div);
+                });
+
+                requestAnimationFrame(drawKanbanLinks);
+            } else {
+                const listGrid = document.getElementById('kanbanListGrid');
+                if (filtered.length === 0) {
+                    listGrid.innerHTML = `
+                        <div class="col-span-full py-12 text-center text-[#8b949e] bg-[#252525] border border-[#333333] rounded-xl">
+                            <p class="font-medium text-gray-300">Nenhum post-it encontrado.</p>
+                            <p class="text-xs mt-1">Clique em "+ Post-it" no topo para criar um novo.</p>
+                        </div>`;
+                    return;
+                }
+                listGrid.innerHTML = filtered.map(entry => {
+                    const st = getKanbanStatusStyles(entry.status || 'todo');
+                    return `<div class="bg-[#252525] rounded-xl shadow-md flex flex-col ${st.border} ${st.opacity}">${buildKanbanCardHTML(entry, false)}</div>`;
+                }).join('');
+            }
+        }
+
+        // Arrastar e soltar via Pointer Events (Mouse + Toque com correção de zoom)
+        function attachPointerDrag(cardEl, entry) {
+            const handle = cardEl.querySelector('.drag-handle');
+            if (!handle) return;
+
+            let isDragging = false;
+            let startX = 0, startY = 0, initialLeft = 0, initialTop = 0;
+
+            handle.addEventListener('pointerdown', (e) => {
+                if (e.target.closest('button') || e.target.closest('select')) return;
+                isDragging = true;
+                startX = e.clientX;
+                startY = e.clientY;
+                initialLeft = parseFloat(cardEl.style.left) || 0;
+                initialTop = parseFloat(cardEl.style.top) || 0;
+
+                document.querySelectorAll('.kanban-card').forEach(c => c.style.zIndex = '10');
+                cardEl.classList.add('is-dragging');
+                handle.setPointerCapture(e.pointerId);
+                e.preventDefault();
+            });
+
+            handle.addEventListener('pointermove', (e) => {
+                if (!isDragging) return;
+                const dx = (e.clientX - startX) / ui.currentZoom;
+                const dy = (e.clientY - startY) / ui.currentZoom;
+
+                const newLeft = Math.max(0, Math.min(3000 - cardEl.offsetWidth, initialLeft + dx));
+                const newTop = Math.max(0, Math.min(3000 - cardEl.offsetHeight, initialTop + dy));
+
+                cardEl.style.left = `${Math.round(newLeft)}px`;
+                cardEl.style.top = `${Math.round(newTop)}px`;
+                drawKanbanLinks();
+            });
+
+            const finishDrag = (e) => {
+                if (!isDragging) return;
+                isDragging = false;
+                cardEl.classList.remove('is-dragging');
+                cardEl.style.zIndex = '20';
+                try { handle.releasePointerCapture(e.pointerId); } catch (_) {}
+
+                const finalX = Math.round(parseFloat(cardEl.style.left) || 0);
+                const finalY = Math.round(parseFloat(cardEl.style.top) || 0);
+                if (finalX !== entry.x || finalY !== entry.y) {
+                    entry.x = finalX;
+                    entry.y = finalY;
+                    saveState();
+                }
+            };
+
+            handle.addEventListener('pointerup', finishDrag);
+            handle.addEventListener('pointercancel', finishDrag);
+        }
+
+        function drawKanbanLinks() {
+            const svg = document.getElementById('linksLayer');
+            if (!svg || ui.kanbanViewMode !== 'canvas') return;
+            svg.innerHTML = '';
+
+            dataState.kanban.forEach(entry => {
+                if (!entry.links || entry.links.length === 0) return;
+                const el1 = document.getElementById(`card-${entry.id}`);
+                if (!el1) return;
+
+                const x1 = el1.offsetLeft + el1.offsetWidth / 2;
+                const y1 = el1.offsetTop + el1.offsetHeight / 2;
+
+                entry.links.forEach(targetId => {
+                    const el2 = document.getElementById(`card-${targetId}`);
+                    if (!el2) return;
+
+                    const x2 = el2.offsetLeft + el2.offsetWidth / 2;
+                    const y2 = el2.offsetTop + el2.offsetHeight / 2;
+
+                    const path = document.createElementNS('http://www.w3.org/2000/svg', 'path');
+                    const midX = (x1 + x2) / 2;
+                    path.setAttribute('d', `M ${x1} ${y1} C ${midX} ${y1}, ${midX} ${y2}, ${x2} ${y2}`);
+                    path.setAttribute('stroke', 'rgba(120, 82, 238, 0.55)');
+                    path.setAttribute('stroke-width', '2.8');
+                    path.setAttribute('fill', 'none');
+                    path.setAttribute('stroke-dasharray', '8,6');
+                    svg.appendChild(path);
+                });
+            });
+        }
+
+        // Ctrl + Scroll para Zoom no quadro infinito
+        document.getElementById('kanbanCanvasWrapper').addEventListener('wheel', (e) => {
+            if (e.ctrlKey || e.metaKey) {
+                e.preventDefault();
+                app.changeZoom(e.deltaY < 0 ? 0.1 : -0.1);
+            }
+        }, { passive: false });
+
+        // =========================================================
+        // 8. MÓDULO 2: IDEIAS ALEATÓRIAS
+        // =========================================================
+        function renderIdeas() {
+            const search = (document.getElementById('ideaSearchInput')?.value || '').trim().toLowerCase();
+            const tagFiltersEl = document.getElementById('ideaTagFilters');
+            const grid = document.getElementById('ideasGrid');
+
+            const allTags = new Set();
+            dataState.ideas.forEach(i => (i.tags || []).forEach(t => allTags.add(t)));
+            const tagsArr = ['all', ...Array.from(allTags).sort()];
+
+            if (!tagsArr.includes(ui.selectedIdeaTag)) ui.selectedIdeaTag = 'all';
+
+            tagFiltersEl.innerHTML = tagsArr.map(tag => {
+                const active = ui.selectedIdeaTag === tag;
+                return `
+                    <button onclick="app.setIdeaTagFilter('${escapeHtml(tag)}')"
+                        class="px-3 py-1 rounded-full text-xs font-medium whitespace-nowrap border transition-colors ${active ? 'bg-[#7852ee] text-white border-[#7852ee]' : 'bg-[#252525] text-[#8b949e] border-[#333333] hover:text-white'}">
+                        ${tag === 'all' ? 'Todas' : `#${escapeHtml(tag)}`}
+                    </button>
+                `;
+            }).join('');
+
+            const filtered = dataState.ideas
+                .filter(idea => {
+                    const matchTag = ui.selectedIdeaTag === 'all' || (idea.tags || []).includes(ui.selectedIdeaTag);
+                    const matchSearch = !search ||
+                        (idea.title || '').toLowerCase().includes(search) ||
+                        (idea.text || '').toLowerCase().includes(search) ||
+                        (idea.tags || []).some(t => t.toLowerCase().includes(search));
+                    return matchTag && matchSearch;
+                })
+                .sort((a, b) => {
+                    if (Boolean(b.pinned) !== Boolean(a.pinned)) return b.pinned ? 1 : -1;
+                    return (b.createdAt || 0) - (a.createdAt || 0);
+                });
+
+            if (filtered.length === 0) {
+                grid.innerHTML = `<div class="col-span-full py-12 text-center text-[#8b949e] bg-[#252525] border border-[#333333] rounded-xl">Nenhuma ideia encontrada. Anote algo no campo acima!</div>`;
+                return;
+            }
+
+            grid.innerHTML = filtered.map(idea => `
+                <div class="bg-[#252525] border ${idea.pinned ? 'border-[#7852ee]/70' : 'border-[#333333]'} rounded-xl p-4 flex flex-col gap-3 shadow-sm hover:border-[#505050] transition-colors">
+                    <div class="flex items-start justify-between gap-2">
+                        <h4 class="font-semibold text-white text-sm leading-snug">${idea.title ? escapeHtml(idea.title) : '<span class="text-[#8b949e] italic">Ideia rápida</span>'}</h4>
+                        <button onclick="app.togglePinIdea('${idea.id}')" class="p-1.5 rounded-lg transition-colors shrink-0 ${idea.pinned ? 'text-[#a388fa] bg-[#7852ee]/20' : 'text-[#8b949e] hover:text-white hover:bg-[#333333]'}" title="${idea.pinned ? 'Desafixar' : 'Fixar no topo'}">
+                            <svg class="w-4 h-4" fill="${idea.pinned ? 'currentColor' : 'none'}" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 5a2 2 0 012-2h10a2 2 0 012 2v16l-7-3.5L5 21V5z"></path></svg>
+                        </button>
+                    </div>
+                    <p class="text-xs sm:text-sm text-gray-300 whitespace-pre-wrap leading-relaxed flex-1">${escapeHtml(idea.text)}</p>
+                    ${(idea.tags || []).length > 0 ? `
+                        <div class="flex flex-wrap gap-1.5">
+                            ${idea.tags.map(t => `<span class="tag-pill text-[11px] px-2 py-0.5 rounded-full">#${escapeHtml(t)}</span>`).join('')}
+                        </div>
+                    ` : ''}
+                    <div class="pt-3 border-t border-[#333333] flex items-center justify-between gap-2">
+                        <button onclick="app.convertIdeaToKanban('${idea.id}')" class="text-xs font-semibold text-[#a388fa] hover:text-white bg-[#7852ee]/15 hover:bg-[#7852ee] px-2.5 py-1.5 rounded-lg transition-colors flex items-center gap-1">
+                            ↗ Virar Post-it
+                        </button>
+                        <div class="flex items-center gap-1">
+                            <button onclick="app.openEditIdeaModal('${idea.id}')" class="p-1.5 text-[#8b949e] hover:text-white hover:bg-[#333333] rounded-lg" title="Editar">
+                                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"></path></svg>
+                            </button>
+                            <button onclick="app.confirmDeleteIdea('${idea.id}')" class="p-1.5 text-[#8b949e] hover:text-red-400 hover:bg-red-500/10 rounded-lg" title="Excluir">
+                                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"></path></svg>
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            `).join('');
+        }
+
+        // =========================================================
+        // 9. MÓDULO 3: LINKS & REDES
+        // =========================================================
+        function detectPlatform(url) {
+            const u = (url || '').toLowerCase();
+            if (u.includes('tiktok.com')) return 'TikTok';
+            if (u.includes('instagram.com') || u.includes('instagr.am')) return 'Instagram';
+            if (u.includes('youtube.com') || u.includes('youtu.be')) return 'YouTube';
+            if (u.includes('twitter.com') || u.includes('x.com')) return 'X/Twitter';
+            return 'Outro';
+        }
+
+        function getPlatformBadgeStyle(platform) {
+            switch (platform) {
+                case 'TikTok': return 'bg-cyan-500/15 text-cyan-300 border-cyan-500/40';
+                case 'Instagram': return 'bg-pink-500/15 text-pink-300 border-pink-500/40';
+                case 'YouTube': return 'bg-red-500/15 text-red-300 border-red-500/40';
+                case 'X/Twitter': return 'bg-sky-500/15 text-sky-300 border-sky-500/40';
+                default: return 'bg-zinc-500/15 text-zinc-300 border-zinc-500/40';
+            }
+        }
+
+        function renderLinks() {
+            const platforms = ['all', 'TikTok', 'Instagram', 'YouTube', 'X/Twitter', 'Outro'];
+            const pContainer = document.getElementById('linkPlatformFilters');
+            pContainer.innerHTML = platforms.map(p => {
+                const active = ui.selectedLinkPlatform === p;
+                return `
+                    <button onclick="app.setLinkPlatformFilter('${p}')"
+                        class="px-3 py-1.5 rounded-lg text-xs font-semibold whitespace-nowrap border transition-colors ${active ? 'bg-[#7852ee] text-white border-[#7852ee]' : 'bg-[#252525] text-[#8b949e] border-[#333333] hover:text-white'}">
+                        ${p === 'all' ? 'Todas Redes' : p}
+                    </button>
+                `;
+            }).join('');
+
+            const catSelect = document.getElementById('linkCategoryFilter');
+            const prevCat = catSelect.value || 'all';
+            const uniqueCats = Array.from(new Set(dataState.links.map(l => l.category).filter(Boolean))).sort();
+            catSelect.innerHTML = `<option value="all">Todas coleções</option>` + uniqueCats.map(c => `<option value="${escapeHtml(c)}">${escapeHtml(c)}</option>`).join('');
+            catSelect.value = uniqueCats.includes(prevCat) ? prevCat : 'all';
+
+            const search = (document.getElementById('linkSearchInput')?.value || '').trim().toLowerCase();
+            const statusFilter = document.getElementById('linkStatusFilter')?.value || 'all';
+            const activeCat = catSelect.value;
+
+            const filtered = dataState.links
+                .filter(l => {
+                    const plat = l.platform || detectPlatform(l.url);
+                    const isWatched = Boolean(l.watched ?? l.seen);
+                    const matchPlat = ui.selectedLinkPlatform === 'all' || plat === ui.selectedLinkPlatform;
+                    const matchCat = activeCat === 'all' || l.category === activeCat;
+                    const matchStatus = statusFilter === 'all' || (statusFilter === 'watched' ? isWatched : !isWatched);
+                    const matchSearch = !search ||
+                        (l.title || '').toLowerCase().includes(search) ||
+                        (l.url || '').toLowerCase().includes(search) ||
+                        (l.category || '').toLowerCase().includes(search) ||
+                        (l.tags || []).some(t => t.toLowerCase().includes(search));
+                    return matchPlat && matchCat && matchStatus && matchSearch;
+                })
+                .sort((a, b) => {
+                    const aw = Boolean(a.watched ?? a.seen);
+                    const bw = Boolean(b.watched ?? b.seen);
+                    if (aw !== bw) return aw ? 1 : -1;
+                    return (b.createdAt || 0) - (a.createdAt || 0);
+                });
+
+            const grid = document.getElementById('linksGrid');
+            if (filtered.length === 0) {
+                grid.innerHTML = `<div class="col-span-full py-12 text-center text-[#8b949e] bg-[#252525] border border-[#333333] rounded-xl">Nenhum link salvo para este filtro.</div>`;
+                return;
+            }
+
+            grid.innerHTML = filtered.map(link => {
+                const plat = link.platform || detectPlatform(link.url);
+                const badgeCls = getPlatformBadgeStyle(plat);
+                const isWatched = Boolean(link.watched ?? link.seen);
+                const tags = Array.isArray(link.tags) ? link.tags : [];
+
+                return `
+                    <div class="bg-[#252525] border border-[#333333] rounded-xl p-4 flex flex-col gap-3 transition-opacity ${isWatched ? 'opacity-60' : ''}">
+                        <div class="flex items-center justify-between gap-2">
+                            <span class="text-[11px] font-bold px-2.5 py-0.5 rounded-full border ${badgeCls}">${plat}</span>
+                            ${link.category ? `<span class="text-[11px] font-medium px-2 py-0.5 rounded-md bg-[#1a1a1a] border border-[#333333] text-gray-300 truncate max-w-[130px]">${escapeHtml(link.category)}</span>` : ''}
+                        </div>
+                        <div class="flex-1 space-y-1.5">
+                            <h4 class="font-semibold text-sm text-white leading-snug ${isWatched ? 'line-through text-gray-400' : ''}">${escapeHtml(link.title)}</h4>
+                            <p class="text-[11px] mono text-[#8b949e] truncate">${escapeHtml(link.url)}</p>
+                            ${tags.length > 0 ? `<div class="flex flex-wrap gap-1 pt-1">${tags.map(t => `<span class="tag-pill text-[10px] px-2 py-0.5 rounded-full">#${escapeHtml(t)}</span>`).join('')}</div>` : ''}
+                        </div>
+                        <div class="pt-3 border-t border-[#333333] flex items-center justify-between gap-2">
+                            <a href="${escapeHtml(link.url)}" target="_blank" rel="noopener noreferrer" class="btn-primary px-3 py-1.5 rounded-lg text-xs font-semibold flex items-center gap-1.5">
+                                Abrir
+                                <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14"></path></svg>
+                            </a>
+                            <div class="flex items-center gap-1">
+                                <button onclick="app.toggleLinkWatched('${link.id}')" class="px-2 py-1.5 rounded-lg text-xs font-medium border transition-colors ${isWatched ? 'bg-emerald-500/15 text-emerald-300 border-emerald-500/40' : 'bg-[#1a1a1a] text-[#8b949e] border-[#333333] hover:text-white'}">
+                                    ${isWatched ? '✓ Assistido' : 'Pendente'}
+                                </button>
+                                <button onclick="app.editLinkItem('${link.id}')" class="p-1.5 text-[#8b949e] hover:text-white hover:bg-[#333333] rounded-lg" title="Editar">
+                                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"></path></svg>
+                                </button>
+                                <button onclick="app.confirmDeleteLink('${link.id}')" class="p-1.5 text-[#8b949e] hover:text-red-400 hover:bg-red-500/10 rounded-lg" title="Excluir">
+                                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"></path></svg>
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                `;
+            }).join('');
+        }
+
+        // =========================================================
+        // 10. MÓDULO 4: LISTAS & CHECKLISTS
+        // =========================================================
+        function renderLists() {
+            const sortedLists = [...dataState.lists].sort((a, b) => (b.createdAt || 0) - (a.createdAt || 0));
+            if (!ui.activeListId || !sortedLists.some(l => l.id === ui.activeListId)) {
+                ui.activeListId = sortedLists[0]?.id || null;
+            }
+
+            const sidebar = document.getElementById('listsSidebar');
+            if (sortedLists.length === 0) {
+                sidebar.innerHTML = `<p class="text-xs text-[#8b949e] italic py-4 text-center">Nenhuma lista criada ainda.</p>`;
+            } else {
+                sidebar.innerHTML = sortedLists.map(list => {
+                    const items = list.items || [];
+                    const doneCount = items.filter(i => i.done).length;
+                    const active = list.id === ui.activeListId;
+                    return `
+                        <button onclick="app.selectList('${list.id}')"
+                            class="w-full flex items-center justify-between gap-2 p-3 rounded-xl border text-left transition-all ${active ? 'bg-[#7852ee]/15 border-[#7852ee] text-white' : 'bg-[#1a1a1a] border-[#333333] text-gray-300 hover:border-[#4a4a4a]'}">
+                            <span class="font-medium text-sm truncate">${escapeHtml(list.name)}</span>
+                            <span class="mono text-xs px-2 py-0.5 rounded-full ${active ? 'bg-[#7852ee] text-white' : 'bg-[#252525] text-[#8b949e]'}">${doneCount}/${items.length}</span>
+                        </button>
+                    `;
+                }).join('');
+            }
+
+            const activeList = sortedLists.find(l => l.id === ui.activeListId);
+            const container = document.getElementById('activeListContainer');
+            if (!activeList) {
+                container.innerHTML = `<div class="h-full flex flex-col items-center justify-center text-center text-[#8b949e] py-16">
+                    <p class="text-sm font-medium text-gray-300">Selecione ou crie uma lista ao lado.</p>
+                </div>`;
+                return;
+            }
+
+            const items = activeList.items || [];
+            const doneCount = items.filter(i => i.done).length;
+            const pct = items.length > 0 ? Math.round((doneCount / items.length) * 100) : 0;
+
+            container.innerHTML = `
+                <div class="space-y-4">
+                    <div class="flex flex-wrap items-center justify-between gap-2 border-b border-[#333333] pb-3.5">
+                        <div>
+                            <h3 class="text-lg font-bold text-white">${escapeHtml(activeList.name)}</h3>
+                            <p class="text-xs text-[#8b949e]">${doneCount} de ${items.length} concluídos (${pct}%)</p>
+                        </div>
+                        <div class="flex items-center gap-1.5">
+                            ${doneCount > 0 ? `<button onclick="app.clearCheckedListItems('${activeList.id}')" class="btn-secondary px-2.5 py-1.5 rounded-lg text-xs font-medium">Limpar marcados</button>` : ''}
+                            <button onclick="app.openListModal('${activeList.id}')" class="btn-secondary p-1.5 rounded-lg" title="Renomear lista">
+                                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"></path></svg>
+                            </button>
+                            <button onclick="app.confirmDeleteList('${activeList.id}')" class="p-1.5 rounded-lg border border-red-500/30 text-red-400 hover:bg-red-500/10" title="Excluir lista">
+                                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"></path></svg>
+                            </button>
+                        </div>
+                    </div>
+
+                    <div class="w-full h-2 bg-[#1a1a1a] rounded-full overflow-hidden border border-[#333333]">
+                        <div class="h-full bg-emerald-500 transition-all duration-300" style="width: ${pct}%"></div>
+                    </div>
+
+                    <form onsubmit="app.addListItem(event, '${activeList.id}')" class="flex gap-2">
+                        <input type="text" id="newListItemText" required placeholder="Adicionar item e pressionar Enter..." class="flex-1 input-obsidian rounded-lg px-3 py-2 text-sm">
+                        <button type="submit" class="btn-primary px-4 py-2 rounded-lg text-sm font-semibold shrink-0">Adicionar</button>
+                    </form>
+
+                    <div class="space-y-2 pt-1">
+                        ${items.length === 0 ? `<p class="text-xs text-[#8b949e] italic py-8 text-center">Lista vazia. Adicione o primeiro item acima.</p>` :
+                        items.map(item => `
+                            <div class="flex items-center justify-between gap-3 p-3 rounded-xl bg-[#1a1a1a] border border-[#333333] hover:border-[#444444] transition-colors">
+                                <label class="flex items-center gap-3 flex-1 cursor-pointer min-w-0">
+                                    <input type="checkbox" ${item.done ? 'checked' : ''} onchange="app.toggleListItem('${activeList.id}', '${item.id}')"
+                                        class="w-5 h-5 rounded accent-[#7852ee] cursor-pointer shrink-0">
+                                    <span class="text-sm break-words ${item.done ? 'line-through text-[#6b7280]' : 'text-gray-100'}">${escapeHtml(item.text)}</span>
+                                </label>
+                                <button onclick="app.deleteListItem('${activeList.id}', '${item.id}')" class="p-1.5 text-[#8b949e] hover:text-red-400 rounded-lg shrink-0" title="Remover item">
+                                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path></svg>
+                                </button>
+                            </div>
+                        `).join('')}
+                    </div>
+                </div>
+            `;
+        }
+
+        // =========================================================
+        // 11. MÓDULO 5: PROJETOS ATIVOS
+        // =========================================================
+        function renderProjects() {
+            const sorted = [...dataState.projects].sort((a, b) => (b.createdAt || 0) - (a.createdAt || 0));
+            if (!ui.activeProjectId || !sorted.some(p => p.id === ui.activeProjectId)) {
+                ui.activeProjectId = sorted[0]?.id || null;
+            }
+
+            const grid = document.getElementById('projectsGrid');
+            const panel = document.getElementById('activeProjectPanel');
+
+            if (sorted.length === 0) {
+                grid.innerHTML = `<div class="col-span-full py-10 text-center text-[#8b949e] bg-[#252525] border border-[#333333] rounded-xl">Nenhum projeto cadastrado. Clique em "+ Novo Projeto" no topo.</div>`;
+                panel.innerHTML = '';
+                panel.classList.add('hidden');
+                return;
+            }
+            panel.classList.remove('hidden');
+
+            grid.innerHTML = sorted.map(proj => {
+                const feats = proj.features || [];
+                const done = feats.filter(f => f.done).length;
+                const pct = feats.length ? Math.round((done / feats.length) * 100) : 0;
+                const active = proj.id === ui.activeProjectId;
+                const statusBadge = proj.status === 'Ativo'
+                    ? 'bg-emerald-500/15 text-emerald-300 border-emerald-500/30'
+                    : proj.status === 'Pausado'
+                        ? 'bg-amber-500/15 text-amber-300 border-amber-500/30'
+                        : 'bg-sky-500/15 text-sky-300 border-sky-500/30';
+
+                return `
+                    <div onclick="app.selectProject('${proj.id}')"
+                        class="cursor-pointer bg-[#252525] rounded-xl p-4 border-2 transition-all space-y-3 ${active ? 'border-[#7852ee] shadow-lg shadow-[#7852ee]/10' : 'border-[#333333] hover:border-[#4b4b4b]'}">
+                        <div class="flex items-start justify-between gap-2">
+                            <div class="flex items-center gap-2 min-w-0">
+                                <span class="w-3 h-3 rounded-full shrink-0" style="background-color: ${escapeHtml(proj.color || '#7852ee')}"></span>
+                                <h4 class="font-bold text-white text-sm truncate">${escapeHtml(proj.name)}</h4>
+                            </div>
+                            <span class="text-[10px] font-semibold px-2 py-0.5 rounded-full border ${statusBadge} shrink-0">${escapeHtml(proj.status || 'Ativo')}</span>
+                        </div>
+                        <p class="text-xs text-[#8b949e] line-clamp-2 min-h-[32px]">${escapeHtml(proj.desc || 'Sem descrição.')}</p>
+                        <div class="space-y-1">
+                            <div class="flex justify-between text-[11px] mono text-[#8b949e]">
+                                <span>${done}/${feats.length} features</span>
+                                <span>${pct}%</span>
+                            </div>
+                            <div class="w-full h-1.5 bg-[#1a1a1a] rounded-full overflow-hidden">
+                                <div class="h-full rounded-full transition-all duration-300" style="width: ${pct}%; background-color: ${escapeHtml(proj.color || '#7852ee')}"></div>
+                            </div>
+                        </div>
+                    </div>
+                `;
+            }).join('');
+
+            const activeProj = sorted.find(p => p.id === ui.activeProjectId);
+            if (!activeProj) return;
+
+            const feats = [...(activeProj.features || [])].sort((a, b) => {
+                if (Boolean(a.done) !== Boolean(b.done)) return a.done ? 1 : -1;
+                const pRank = { Alta: 0, Média: 1, Baixa: 2 };
+                return (pRank[a.priority] ?? 1) - (pRank[b.priority] ?? 1);
+            });
+
+            panel.innerHTML = `
+                <div class="space-y-4">
+                    <div class="flex flex-wrap items-center justify-between gap-3 border-b border-[#333333] pb-3.5">
+                        <div class="flex items-center gap-2.5">
+                            <span class="w-3.5 h-3.5 rounded-full" style="background-color: ${escapeHtml(activeProj.color || '#7852ee')}"></span>
+                            <div>
+                                <h3 class="text-base sm:text-lg font-bold text-white">${escapeHtml(activeProj.name)} — Features & Melhorias</h3>
+                                <p class="text-xs text-[#8b949e]">${escapeHtml(activeProj.desc || 'Planejamento do projeto')}</p>
+                            </div>
+                        </div>
+                        <div class="flex items-center gap-1.5">
+                            <button onclick="app.openProjectModal('${activeProj.id}')" class="btn-secondary px-2.5 py-1.5 rounded-lg text-xs font-medium">Editar</button>
+                            <button onclick="app.confirmDeleteProject('${activeProj.id}')" class="px-2.5 py-1.5 rounded-lg text-xs font-medium border border-red-500/30 text-red-400 hover:bg-red-500/10">Excluir</button>
+                        </div>
+                    </div>
+
+                    <form onsubmit="app.addProjectFeature(event, '${activeProj.id}')" class="flex flex-col sm:flex-row gap-2">
+                        <input type="text" id="newFeatureTitle" required placeholder="O que colocar nesse projeto?" class="flex-1 input-obsidian rounded-lg px-3 py-2 text-sm">
+                        <select id="newFeaturePriority" class="sm:w-36 input-obsidian rounded-lg px-2.5 py-2 text-sm">
+                            <option value="Alta">Prioridade Alta</option>
+                            <option value="Média" selected>Prioridade Média</option>
+                            <option value="Baixa">Prioridade Baixa</option>
+                        </select>
+                        <button type="submit" class="btn-primary px-4 py-2 rounded-lg text-sm font-semibold shrink-0">+ Feature</button>
+                    </form>
+
+                    <div class="space-y-2">
+                        ${feats.length === 0 ? `<p class="text-xs text-[#8b949e] italic py-6 text-center">Nenhuma funcionalidade planejada ainda.</p>` :
+                        feats.map(f => {
+                            const prioCls = f.priority === 'Alta'
+                                ? 'bg-red-500/15 text-red-300 border-red-500/30'
+                                : f.priority === 'Média'
+                                    ? 'bg-amber-500/15 text-amber-300 border-amber-500/30'
+                                    : 'bg-zinc-500/15 text-zinc-300 border-zinc-500/30';
+                            return `
+                                <div class="flex items-center justify-between gap-3 p-3 rounded-xl bg-[#1a1a1a] border border-[#333333]">
+                                    <label class="flex items-center gap-3 flex-1 cursor-pointer min-w-0">
+                                        <input type="checkbox" ${f.done ? 'checked' : ''} onchange="app.toggleProjectFeature('${activeProj.id}', '${f.id}')"
+                                            class="w-5 h-5 rounded accent-[#7852ee] cursor-pointer shrink-0">
+                                        <span class="text-sm ${f.done ? 'line-through text-[#6b7280]' : 'text-gray-100'}">${escapeHtml(f.title)}</span>
+                                    </label>
+                                    <div class="flex items-center gap-2 shrink-0">
+                                        <span class="text-[10px] font-semibold px-2 py-0.5 rounded-full border ${prioCls}">${escapeHtml(f.priority || 'Média')}</span>
+                                        <button onclick="app.deleteProjectFeature('${activeProj.id}', '${f.id}')" class="p-1 text-[#8b949e] hover:text-red-400 rounded-lg" title="Remover">
+                                            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path></svg>
+                                        </button>
+                                    </div>
+                                </div>
+                            `;
+                        }).join('')}
+                    </div>
+                </div>
+            `;
+        }
+
+        // =========================================================
+        // 12. MÓDULO 6: CALENDÁRIO
+        // =========================================================
+        function renderCalendar() {
+            const year = ui.calendarYear;
+            const month = ui.calendarMonth;
+            const monthStart = new Date(year, month, 1);
+            document.getElementById('calendarMonthLabel').textContent = monthStart.toLocaleDateString('pt-BR', { month: 'long', year: 'numeric' });
+
+            const firstWeekday = monthStart.getDay();
+            const daysInMonth = new Date(year, month + 1, 0).getDate();
+            const todayStr = toDateStr(new Date());
+
+            const eventsByDate = {};
+            dataState.events.forEach(ev => {
+                if (!eventsByDate[ev.date]) eventsByDate[ev.date] = [];
+                eventsByDate[ev.date].push(ev);
+            });
+
+            const grid = document.getElementById('calendarDaysGrid');
+            let html = '';
+
+            for (let i = 0; i < firstWeekday; i++) {
+                html += `<div class="h-12 sm:h-14 rounded-lg bg-[#1e1e1e]/40"></div>`;
+            }
+
+            for (let day = 1; day <= daysInMonth; day++) {
+                const dateStr = `${year}-${String(month + 1).padStart(2, '0')}-${String(day).padStart(2, '0')}`;
+                const dayEvents = eventsByDate[dateStr] || [];
+                const isToday = dateStr === todayStr;
+                const isSelected = dateStr === ui.selectedDateStr;
+
+                const dotsHtml = dayEvents.slice(0, 3).map(ev =>
+                    `<span class="w-1.5 h-1.5 rounded-full" style="background-color: ${escapeHtml(ev.color || '#7852ee')}"></span>`
+                ).join('') + (dayEvents.length > 3 ? `<span class="text-[9px] text-[#8b949e] leading-none">+</span>` : '');
+
+                html += `
+                    <button onclick="app.selectCalendarDate('${dateStr}')"
+                        class="h-12 sm:h-14 rounded-xl border flex flex-col items-center justify-between py-1.5 px-1 transition-all ${isSelected ? 'bg-[#7852ee]/20 border-[#7852ee] text-white' : isToday ? 'bg-[#1a1a1a] border-[#a388fa]/60 text-[#a388fa]' : 'bg-[#1a1a1a] border-[#303030] text-gray-300 hover:border-[#4b4b4b]'}">
+                        <span class="text-xs sm:text-sm font-semibold mono ${isToday ? 'font-bold' : ''}">${day}</span>
+                        <div class="flex items-center gap-0.5 h-2">${dotsHtml}</div>
+                    </button>
+                `;
+            }
+            grid.innerHTML = html;
+
+            // Dia Selecionado
+            document.getElementById('selectedDateHeading').textContent = formatDateBR(ui.selectedDateStr);
+            const selectedEvents = (eventsByDate[ui.selectedDateStr] || [])
+                .sort((a, b) => (a.time || '99:99').localeCompare(b.time || '99:99'));
+
+            const dayList = document.getElementById('selectedDayEventsList');
+            if (selectedEvents.length === 0) {
+                dayList.innerHTML = `<p class="text-xs text-[#8b949e] italic py-4 text-center">Nenhum compromisso neste dia.</p>`;
+            } else {
+                dayList.innerHTML = selectedEvents.map(ev => `
+                    <div class="bg-[#1a1a1a] border border-[#333333] rounded-xl p-3 flex items-start justify-between gap-2" style="border-left: 4px solid ${escapeHtml(ev.color || '#7852ee')}">
+                        <div class="min-w-0 flex-1">
+                            <div class="flex items-center gap-2">
+                                ${ev.time ? `<span class="mono text-xs font-bold text-[#a388fa]">${escapeHtml(ev.time)}</span>` : ''}
+                                <h5 class="font-semibold text-sm text-white truncate">${escapeHtml(ev.title)}</h5>
+                            </div>
+                            ${ev.notes ? `<p class="text-xs text-[#8b949e] mt-1 whitespace-pre-wrap">${escapeHtml(ev.notes)}</p>` : ''}
+                        </div>
+                        <div class="flex items-center gap-1 shrink-0">
+                            <button onclick="app.openEventModal('${ev.id}')" class="p-1 text-[#8b949e] hover:text-white rounded" title="Editar">
+                                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"></path></svg>
+                            </button>
+                            <button onclick="app.confirmDeleteEvent('${ev.id}')" class="p-1 text-[#8b949e] hover:text-red-400 rounded" title="Excluir">
+                                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"></path></svg>
+                            </button>
+                        </div>
+                    </div>
+                `).join('');
+            }
+
+            // Próximos Compromissos
+            const upcoming = dataState.events
+                .filter(ev => ev.date >= todayStr)
+                .sort((a, b) => (a.date + (a.time || '99:99')).localeCompare(b.date + (b.time || '99:99')))
+                .slice(0, 8);
+
+            const upcomingEl = document.getElementById('upcomingEventsList');
+            if (upcoming.length === 0) {
+                upcomingEl.innerHTML = `<p class="text-xs text-[#8b949e] italic text-center py-3">Sem próximos compromissos agendados.</p>`;
+            } else {
+                upcomingEl.innerHTML = upcoming.map(ev => {
+                    const [, m, d] = ev.date.split('-');
+                    return `
+                        <button onclick="app.jumpToEventDate('${ev.date}')" class="w-full text-left bg-[#1a1a1a] hover:bg-[#222] border border-[#333333] rounded-lg px-3 py-2 flex items-center justify-between gap-2 transition-colors">
+                            <div class="flex items-center gap-2 min-w-0">
+                                <span class="w-2 h-2 rounded-full shrink-0" style="background-color: ${escapeHtml(ev.color || '#7852ee')}"></span>
+                                <span class="text-xs font-medium text-gray-200 truncate">${escapeHtml(ev.title)}</span>
+                            </div>
+                            <span class="mono text-[11px] text-[#8b949e] shrink-0">${d}/${m}${ev.time ? ' ' + ev.time : ''}</span>
+                        </button>
+                    `;
+                }).join('');
+            }
+        }
+
+        // =========================================================
+        // 13. MÓDULO 7: LEITURAS (LIVROS, MANGÁS E HQs)
+        // =========================================================
+        function renderReadings() {
+            const search = (document.getElementById('readingSearchInput')?.value || '').trim().toLowerCase();
+            const typeFilter = document.getElementById('readingTypeFilter')?.value || 'all';
+            const statusFilter = document.getElementById('readingStatusFilter')?.value || 'all';
+
+            const filtered = dataState.readings
+                .filter(r => {
+                    const matchType = typeFilter === 'all' || r.type === typeFilter;
+                    const matchStatus = statusFilter === 'all' || r.status === statusFilter;
+                    const matchSearch = !search || (r.title || '').toLowerCase().includes(search);
+                    return matchType && matchStatus && matchSearch;
+                })
+                .sort((a, b) => (b.updatedAt || 0) - (a.updatedAt || 0));
+
+            const grid = document.getElementById('readingsGrid');
+            if (filtered.length === 0) {
+                grid.innerHTML = `<div class="col-span-full py-12 text-center text-[#8b949e] bg-[#252525] border border-[#333333] rounded-xl">Nenhuma leitura encontrada. Clique em "+ Nova Obra" no topo!</div>`;
+                return;
+            }
+
+            grid.innerHTML = filtered.map(r => {
+                const cur = Number(r.current || 0);
+                const tot = Number(r.total || 0);
+                const pct = tot > 0 ? Math.min(100, Math.round((cur / tot) * 100)) : 0;
+                const unitLabel = r.unit === 'Capítulos' ? 'Cap.' : (r.unit === 'Páginas' ? 'Pág.' : (r.type === 'Livro' ? 'Pág.' : 'Cap.'));
+
+                const typeBadge = r.type === 'Mangá'
+                    ? 'bg-pink-500/15 text-pink-300 border-pink-500/30'
+                    : r.type === 'HQ'
+                        ? 'bg-amber-500/15 text-amber-300 border-amber-500/30'
+                        : 'bg-sky-500/15 text-sky-300 border-sky-500/30';
+
+                const statusCls = r.status === 'Concluído'
+                    ? 'text-emerald-400'
+                    : r.status === 'Lendo'
+                        ? 'text-[#a388fa]'
+                        : 'text-[#8b949e]';
+
+                return `
+                    <div class="bg-[#252525] border border-[#333333] rounded-xl p-4 flex flex-col gap-3.5 shadow-sm">
+                        <div class="flex items-start justify-between gap-2">
+                            <span class="text-[11px] font-semibold px-2.5 py-0.5 rounded-full border ${typeBadge}">${escapeHtml(r.type)}</span>
+                            <div class="flex items-center gap-1">
+                                <span class="text-xs font-semibold ${statusCls} mr-1">${escapeHtml(r.status)}</span>
+                                <button onclick="app.openReadingModal('${r.id}')" class="p-1 text-[#8b949e] hover:text-white rounded" title="Editar">
+                                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"></path></svg>
+                                </button>
+                                <button onclick="app.confirmDeleteReading('${r.id}')" class="p-1 text-[#8b949e] hover:text-red-400 rounded" title="Excluir">
+                                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"></path></svg>
+                                </button>
+                            </div>
+                        </div>
+
+                        <h4 class="font-bold text-white text-base leading-snug">${escapeHtml(r.title)}</h4>
+
+                        <div class="space-y-1.5">
+                            <div class="flex items-center justify-between text-xs mono">
+                                <span class="text-gray-300">${unitLabel} <strong>${cur}</strong>${tot > 0 ? ` / ${tot}` : ''}</span>
+                                ${tot > 0 ? `<span class="text-[#a388fa] font-semibold">${pct}%</span>` : '<span class="text-[#8b949e]">Sem total definido</span>'}
+                            </div>
+                            <div class="w-full h-2.5 bg-[#1a1a1a] rounded-full overflow-hidden border border-[#333333]">
+                                <div class="h-full ${pct >= 100 ? 'bg-emerald-500' : 'bg-[#7852ee]'} transition-all duration-300" style="width: ${tot > 0 ? pct : (cur > 0 ? 15 : 0)}%"></div>
+                            </div>
+                        </div>
+
+                        <!-- Controles Rápidos Grandes para Celular -->
+                        <div class="pt-2 border-t border-[#333333] grid grid-cols-5 gap-1.5">
+                            <button onclick="app.stepReading('${r.id}', -1)" class="btn-secondary py-2 rounded-lg text-xs mono font-bold">-1</button>
+                            <input type="number" min="0" value="${cur}" onchange="app.setReadingProgress('${r.id}', this.value)"
+                                class="text-center input-obsidian rounded-lg py-2 px-1 text-xs mono font-bold text-white" title="Editar valor diretamente">
+                            <button onclick="app.stepReading('${r.id}', 1)" class="btn-primary py-2 rounded-lg text-xs mono font-bold">+1</button>
+                            <button onclick="app.stepReading('${r.id}', 5)" class="btn-secondary py-2 rounded-lg text-xs mono font-bold">+5</button>
+                            <button onclick="app.stepReading('${r.id}', 10)" class="btn-secondary py-2 rounded-lg text-xs mono font-bold">+10</button>
+                        </div>
+                    </div>
+                `;
+            }).join('');
+        }
+
+        function renderAll() {
+            renderNavigation();
+            updateHeaderForModule();
+            renderKanban();
+            renderIdeas();
+            renderLinks();
+            renderLists();
+            renderProjects();
+            renderCalendar();
+            renderReadings();
+        }
+
+        // =========================================================
+        // 14. AÇÕES EXPOSTAS PARA O HTML (window.app)
+        // =========================================================
+        window.app = {
+            switchModule,
+
+            // Modais e Confirm
+            openModal(id) { document.getElementById(id)?.classList.remove('hidden'); },
+            closeModal(id) { document.getElementById(id)?.classList.add('hidden'); },
+            openMobileMenu() { document.getElementById('mobileMenuModal').classList.remove('hidden'); },
+            closeMobileMenu() { document.getElementById('mobileMenuModal').classList.add('hidden'); },
+
+            openConfirm(title, message, onConfirm) {
+                document.getElementById('confirmModalTitle').textContent = title;
+                document.getElementById('confirmModalMessage').textContent = message;
+                confirmCallback = onConfirm;
+                document.getElementById('confirmModalBtn').onclick = () => {
+                    const cb = confirmCallback;
+                    this.closeConfirm();
+                    if (cb) cb();
+                };
+                this.openModal('confirmModal');
+            },
+            closeConfirm() {
+                confirmCallback = null;
+                this.closeModal('confirmModal');
+            },
+
+            // --- NUVEM FIREBASE & BACKUP ---
+            openCloudModal() {
+                document.getElementById('fbSyncKey').value = activeSyncKey || getStoredSyncKey();
+                updateFirestoreRulesPreview();
+                this.openModal('cloudModal');
+            },
+            updateFirestoreRulesPreview,
+
+            saveSyncKey(e) {
+                e.preventDefault();
+                const syncKey = document.getElementById('fbSyncKey').value.trim();
+                if (!syncKey) {
+                    showToast('Informe uma Chave Secreta válida.', 'error');
+                    return;
+                }
+                const changed = syncKey !== activeSyncKey;
+                updateFirestoreRulesPreview();
+                connectToFirebase(syncKey, false, changed);
+            },
+
+            async forcePushToCloud() {
+                if (!activeSyncKey) {
+                    showToast('Nenhuma chave secreta configurada.', 'error');
+                    return;
+                }
+                await pushStateToFirestore(true);
+            },
+
+            copyFirestoreRules() {
+                const text = document.getElementById('firestoreRulesCode').textContent;
+                if (copyTextFallback(text)) {
+                    showToast('Regras do Firestore copiadas!', 'success');
+                } else {
+                    showToast('Selecione e copie o texto manualmente.', 'error');
+                }
+            },
+
+            exportFullBackup() {
+                const payload = {
+                    version: 3,
+                    app: 'Kanban Companion Hub',
+                    exportedAt: new Date().toISOString(),
+                    data: dataState
+                };
+                const blob = new Blob([JSON.stringify(payload, null, 2)], { type: 'application/json' });
+                const url = URL.createObjectURL(blob);
+                const a = document.createElement('a');
+                a.href = url;
+                a.download = `kanban_hub_backup_${toDateStr(new Date())}.json`;
+                document.body.appendChild(a);
+                a.click();
+                a.remove();
+                URL.revokeObjectURL(url);
+                showToast('Backup JSON exportado!', 'success');
+            },
+
+            importFullBackup(event) {
+                const file = event.target.files?.[0];
+                if (!file) return;
+                const reader = new FileReader();
+                reader.onload = (ev) => {
+                    try {
+                        const parsed = JSON.parse(ev.target.result);
+
+                        // Compatibilidade com backups antigos (array simples de post-its do Kanban)
+                        if (Array.isArray(parsed)) {
+                            const existingIds = new Set(dataState.kanban.map(k => k.id));
+                            parsed.forEach(item => {
+                                const id = item.id || generateId('kb');
+                                const normalized = {
+                                    id,
+                                    code: item.code || 'POST',
+                                    title: item.title || 'Sem título',
+                                    tag: item.tag || '',
+                                    desc: item.desc ?? item.description ?? '',
+                                    status: item.status === 'Em Andamento' ? 'doing' : (item.status === 'Concluído' ? 'done' : (item.status === 'A Fazer' ? 'todo' : (item.status || 'todo'))),
+                                    timestamp: item.timestamp || Date.now(),
+                                    x: item.x ?? 100,
+                                    y: item.y ?? 100,
+                                    links: Array.isArray(item.links) ? item.links : []
+                                };
+                                if (existingIds.has(id)) {
+                                    const idx = dataState.kanban.findIndex(k => k.id === id);
+                                    dataState.kanban[idx] = normalized;
+                                } else {
+                                    dataState.kanban.push(normalized);
+                                }
+                            });
+                            saveState();
+                            renderAll();
+                            showToast(`${parsed.length} post-its antigos importados!`, 'success');
+                            return;
+                        }
+
+                        // Backup completo do Hub
+                        const sourceData = parsed?.data ? parsed.data : parsed;
+                        if (sourceData && typeof sourceData === 'object' && ('kanban' in sourceData || 'ideas' in sourceData || 'lists' in sourceData)) {
+                            dataState = normalizeDataState(sourceData);
+                            saveState();
+                            renderAll();
+                            showToast('Backup completo restaurado com sucesso!', 'success');
+                        } else {
+                            throw new Error('Formato não reconhecido');
+                        }
+                    } catch (err) {
+                        console.error('Erro ao importar JSON:', err);
+                        showToast('Arquivo JSON inválido ou incompatível.', 'error');
+                    }
+                };
+                reader.readAsText(file);
+                event.target.value = '';
+            },
+
+            // --- KANBAN ---
+            setKanbanViewMode(mode) {
+                ui.kanbanViewMode = mode;
+                renderKanban();
+            },
+            renderKanban,
+
+            changeZoom(delta) {
+                ui.currentZoom = Math.max(0.25, Math.min(2, +(ui.currentZoom + delta).toFixed(2)));
+                document.getElementById('zoomLevelDisplay').textContent = `${Math.round(ui.currentZoom * 100)}%`;
+                document.getElementById('canvas-container').style.transform = `scale(${ui.currentZoom})`;
+            },
+            resetZoom() {
+                ui.currentZoom = 1;
+                document.getElementById('zoomLevelDisplay').textContent = '100%';
+                document.getElementById('canvas-container').style.transform = 'scale(1)';
+            },
+
+            openKanbanForm(id = null) {
+                const isDesktop = window.innerWidth >= 768;
+                const item = id ? dataState.kanban.find(x => x.id === id) : null;
+
+                if (isDesktop) {
+                    const drawer = document.getElementById('kanbanDesktopDrawer');
+                    document.getElementById('kanbanDesktopForm').reset();
+                    document.getElementById('desktopKanbanFormTitle').textContent = item ? 'Editar Post-it' : 'Novo Post-it Digital';
+                    document.getElementById('kdId').value = item?.id || '';
+                    document.getElementById('kdCode').value = item?.code || '';
+                    document.getElementById('kdTitle').value = item?.title || '';
+                    document.getElementById('kdTag').value = item?.tag || '';
+                    document.getElementById('kdStatus').value = item?.status || 'todo';
+                    document.getElementById('kdDesc').value = item?.desc || '';
+                    drawer.classList.remove('hidden');
+                    setTimeout(() => document.getElementById('kdCode').focus(), 50);
+                } else {
+                    document.getElementById('kanbanMobileForm').reset();
+                    document.getElementById('kanbanModalTitle').textContent = item ? 'Editar Post-it' : 'Novo Post-it Digital';
+                    document.getElementById('kmId').value = item?.id || '';
+                    document.getElementById('kmCode').value = item?.code || '';
+                    document.getElementById('kmTitle').value = item?.title || '';
+                    document.getElementById('kmTag').value = item?.tag || '';
+                    document.getElementById('kmStatus').value = item?.status || 'todo';
+                    document.getElementById('kmDesc').value = item?.desc || '';
+                    this.openModal('kanbanFormModal');
+                    setTimeout(() => document.getElementById('kmCode').focus(), 50);
+                }
+            },
+
+            closeKanbanForm() {
+                document.getElementById('kanbanDesktopDrawer').classList.add('hidden');
+                this.closeModal('kanbanFormModal');
+            },
+
+            saveKanbanEntry(e, origin) {
+                e.preventDefault();
+                const p = origin === 'desktop' ? 'kd' : 'km';
+                const editId = document.getElementById(`${p}Id`).value;
+                const existing = editId ? dataState.kanban.find(x => x.id === editId) : null;
+                const id = editId || generateId('kb');
+
+                let posX = existing?.x;
+                let posY = existing?.y;
+                if (posX === undefined || posY === undefined) {
+                    const cw = document.getElementById('kanbanCanvasWrapper');
+                    posX = Math.round(Math.max(40, (cw.scrollLeft + 90) / ui.currentZoom) + (dataState.kanban.length % 5) * 28);
+                    posY = Math.round(Math.max(40, (cw.scrollTop + 70) / ui.currentZoom) + (dataState.kanban.length % 5) * 28);
+                }
+
+                const entry = {
+                    id,
+                    code: document.getElementById(`${p}Code`).value.trim(),
+                    title: document.getElementById(`${p}Title`).value.trim(),
+                    tag: document.getElementById(`${p}Tag`).value.trim(),
+                    status: document.getElementById(`${p}Status`).value,
+                    desc: document.getElementById(`${p}Desc`).value.trim(),
+                    timestamp: existing?.timestamp || Date.now(),
+                    x: posX,
+                    y: posY,
+                    links: existing?.links || []
+                };
+
+                if (existing) {
+                    const idx = dataState.kanban.findIndex(x => x.id === id);
+                    dataState.kanban[idx] = entry;
+                } else {
+                    dataState.kanban.push(entry);
+                }
+
+                saveState();
+                renderKanban();
+                this.closeKanbanForm();
+                showToast(existing ? 'Post-it atualizado!' : 'Post-it salvo!', 'success');
+            },
+
+            changeKanbanStatus(id, newStatus) {
+                const entry = dataState.kanban.find(x => x.id === id);
+                if (!entry) return;
+                entry.status = newStatus;
+                saveState();
+                renderKanban();
+            },
+
+            confirmDeleteKanban(id) {
+                const entry = dataState.kanban.find(x => x.id === id);
+                this.openConfirm('Excluir Post-it', `Remover "${entry?.code || ''} — ${entry?.title || ''}"?`, () => {
+                    dataState.kanban = dataState.kanban.filter(x => x.id !== id);
+                    dataState.kanban.forEach(other => {
+                        if (other.links) other.links = other.links.filter(l => l !== id);
+                    });
+                    saveState();
+                    renderKanban();
+                    showToast('Post-it excluído.', 'info');
+                });
+            },
+
+            openKanbanLinkModal(id) {
+                ui.linkingSourceId = id;
+                const source = dataState.kanban.find(x => x.id === id);
+                if (!source) return;
+                document.getElementById('kanbanLinkSourceLabel').textContent = source.code;
+
+                const others = dataState.kanban.filter(x => x.id !== id);
+                const container = document.getElementById('kanbanLinkCheckboxes');
+                if (others.length === 0) {
+                    container.innerHTML = `<p class="text-xs text-[#8b949e] italic py-3">Nenhum outro post-it no quadro.</p>`;
+                } else {
+                    container.innerHTML = others.map(t => {
+                        const checked = (source.links || []).includes(t.id);
+                        return `
+                            <label class="flex items-center gap-3 p-2.5 rounded-xl bg-[#1a1a1a] border border-[#333333] hover:border-[#4b4b4b] cursor-pointer">
+                                <input type="checkbox" value="${t.id}" ${checked ? 'checked' : ''} class="w-4 h-4 accent-[#7852ee]">
+                                <div class="min-w-0">
+                                    <span class="mono text-xs font-bold text-[#a388fa]">${escapeHtml(t.code)}</span>
+                                    <div class="text-xs text-gray-200 truncate">${escapeHtml(t.title)}</div>
+                                </div>
+                            </label>
+                        `;
+                    }).join('');
+                }
+                this.openModal('kanbanLinkModal');
+            },
+
+            saveKanbanLinks() {
+                const source = dataState.kanban.find(x => x.id === ui.linkingSourceId);
+                if (!source) return;
+                source.links = Array.from(document.querySelectorAll('#kanbanLinkCheckboxes input:checked')).map(cb => cb.value);
+                this.closeModal('kanbanLinkModal');
+                saveState();
+                renderKanban();
+                showToast('Ligações atualizadas!', 'success');
+            },
+
+            openRandomizer() {
+                const pending = dataState.kanban.filter(e => (e.status || 'todo') !== 'done');
+                const content = document.getElementById('randomTaskContent');
+                if (pending.length === 0) {
+                    content.innerHTML = `
+                        <div class="text-lg font-bold text-emerald-400 mb-1">Tudo concluído! 🎉</div>
+                        <p class="text-xs text-[#8b949e]">Não há post-its pendentes para sortear.</p>`;
+                } else {
+                    const pick = pending[Math.floor(Math.random() * pending.length)];
+                    const desc = pick.desc ? escapeHtml(pick.desc).replace(/\n/g, '<br>') : '<span class="italic text-[#666]">Sem detalhes adicionais.</span>';
+                    content.innerHTML = `
+                        <div class="mono text-2xl font-bold text-[#a388fa] bg-[#252525] inline-block px-4 py-1 rounded-lg border border-[#3a3a3a] mb-3">${escapeHtml(pick.code)}</div>
+                        <div class="text-lg font-bold text-white mb-2">${escapeHtml(pick.title)}</div>
+                        ${pick.tag ? `<span class="tag-pill text-xs font-semibold px-3 py-0.5 rounded-full inline-block mb-3">${escapeHtml(pick.tag)}</span>` : ''}
+                        <div class="text-xs text-gray-300 text-left bg-[#222222] border border-[#333333] rounded-lg p-3 max-h-36 overflow-y-auto">${desc}</div>
+                    `;
+                }
+                this.openModal('randomModal');
+            },
+
+            // --- IDEIAS ALEATÓRIAS ---
+            renderIdeas,
+            setIdeaTagFilter(tag) {
+                ui.selectedIdeaTag = tag;
+                renderIdeas();
+            },
+            saveQuickIdea(e) {
+                e.preventDefault();
+                const title = document.getElementById('ideaTitleInput').value.trim();
+                const text = document.getElementById('ideaTextInput').value.trim();
+                const tags = document.getElementById('ideaTagsInput').value.split(',').map(t => t.trim()).filter(Boolean);
+                if (!text) return;
+
+                dataState.ideas.push({
+                    id: generateId('idea'),
+                    title,
+                    text,
+                    tags,
+                    pinned: false,
+                    createdAt: Date.now()
+                });
+                document.getElementById('ideaQuickForm').reset();
+                saveState();
+                renderIdeas();
+                showToast('Ideia capturada!', 'success');
+            },
+            togglePinIdea(id) {
+                const idea = dataState.ideas.find(i => i.id === id);
+                if (!idea) return;
+                idea.pinned = !idea.pinned;
+                saveState();
+                renderIdeas();
+            },
+            openEditIdeaModal(id) {
+                const idea = dataState.ideas.find(i => i.id === id);
+                if (!idea) return;
+                document.getElementById('editIdeaId').value = idea.id;
+                document.getElementById('editIdeaTitle').value = idea.title || '';
+                document.getElementById('editIdeaTags').value = (idea.tags || []).join(', ');
+                document.getElementById('editIdeaText').value = idea.text || '';
+                this.openModal('ideaEditModal');
+            },
+            updateIdea(e) {
+                e.preventDefault();
+                const id = document.getElementById('editIdeaId').value;
+                const idea = dataState.ideas.find(i => i.id === id);
+                if (!idea) return;
+                idea.title = document.getElementById('editIdeaTitle').value.trim();
+                idea.text = document.getElementById('editIdeaText').value.trim();
+                idea.tags = document.getElementById('editIdeaTags').value.split(',').map(t => t.trim()).filter(Boolean);
+                this.closeModal('ideaEditModal');
+                saveState();
+                renderIdeas();
+                showToast('Ideia atualizada!', 'success');
+            },
+            confirmDeleteIdea(id) {
+                this.openConfirm('Excluir Ideia', 'Deseja remover esta ideia permanentemente?', () => {
+                    dataState.ideas = dataState.ideas.filter(i => i.id !== id);
+                    saveState();
+                    renderIdeas();
+                    showToast('Ideia excluída.', 'info');
+                });
+            },
+            convertIdeaToKanban(id) {
+                const idea = dataState.ideas.find(i => i.id === id);
+                if (!idea) return;
+
+                // Gera código sequencial único no formato ID-01, ID-02...
+                let num = 1;
+                const existingCodes = new Set(dataState.kanban.map(k => (k.code || '').toUpperCase()));
+                while (existingCodes.has(`ID-${String(num).padStart(2, '0')}`)) num++;
+                const autoCode = `ID-${String(num).padStart(2, '0')}`;
+
+                const offset = (dataState.kanban.length % 6) * 35;
+                dataState.kanban.push({
+                    id: generateId('kb'),
+                    code: autoCode,
+                    title: idea.title || idea.text.slice(0, 50),
+                    tag: (idea.tags || [])[0] || 'Ideia',
+                    desc: idea.text,
+                    status: 'todo',
+                    timestamp: Date.now(),
+                    x: 120 + offset,
+                    y: 120 + offset,
+                    links: []
+                });
+
+                saveState();
+                renderKanban();
+                showToast(`Post-it ${autoCode} criado no Kanban!`, 'success');
+            },
+
+            // --- LINKS & REDES ---
+            renderLinks,
+            setLinkPlatformFilter(platform) {
+                ui.selectedLinkPlatform = platform;
+                renderLinks();
+            },
+            saveLinkItem(e) {
+                e.preventDefault();
+                const editId = document.getElementById('linkEditId').value;
+                const url = document.getElementById('linkUrlInput').value.trim();
+                const title = document.getElementById('linkTitleInput').value.trim();
+                const category = document.getElementById('linkCategoryInput').value.trim();
+                const tags = document.getElementById('linkTagsInput').value.split(',').map(t => t.trim()).filter(Boolean);
+                const platform = detectPlatform(url);
+
+                const existing = editId ? dataState.links.find(l => l.id === editId) : null;
+                if (existing) {
+                    existing.url = url;
+                    existing.title = title;
+                    existing.category = category;
+                    existing.tags = tags;
+                    existing.platform = platform;
+                } else {
+                    dataState.links.push({
+                        id: generateId('lnk'),
+                        url,
+                        title,
+                        category,
+                        tags,
+                        platform,
+                        watched: false,
+                        createdAt: Date.now()
+                    });
+                }
+
+                this.resetLinkForm();
+                saveState();
+                renderLinks();
+                showToast(existing ? 'Link atualizado!' : `Link (${platform}) salvo!`, 'success');
+            },
+            editLinkItem(id) {
+                const l = dataState.links.find(x => x.id === id);
+                if (!l) return;
+                document.getElementById('linkEditId').value = l.id;
+                document.getElementById('linkUrlInput').value = l.url || '';
+                document.getElementById('linkTitleInput').value = l.title || '';
+                document.getElementById('linkCategoryInput').value = l.category || '';
+                document.getElementById('linkTagsInput').value = (l.tags || []).join(', ');
+                document.getElementById('btnCancelLinkEdit').classList.remove('hidden');
+                document.getElementById('btnSubmitLink').textContent = 'Atualizar Link';
+                document.getElementById('linkUrlInput').focus();
+            },
+            resetLinkForm() {
+                document.getElementById('linkQuickForm').reset();
+                document.getElementById('linkEditId').value = '';
+                document.getElementById('btnCancelLinkEdit').classList.add('hidden');
+                document.getElementById('btnSubmitLink').innerHTML = `<svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path></svg> Salvar Link`;
+            },
+            toggleLinkWatched(id) {
+                const l = dataState.links.find(x => x.id === id);
+                if (!l) return;
+                l.watched = !(l.watched ?? l.seen);
+                delete l.seen;
+                saveState();
+                renderLinks();
+            },
+            confirmDeleteLink(id) {
+                this.openConfirm('Excluir Link', 'Remover este link salvo?', () => {
+                    dataState.links = dataState.links.filter(x => x.id !== id);
+                    saveState();
+                    renderLinks();
+                    showToast('Link excluído.', 'info');
+                });
+            },
+
+            // --- LISTAS & CHECKLISTS ---
+            selectList(id) {
+                ui.activeListId = id;
+                renderLists();
+            },
+            openListModal(editId = null) {
+                const existing = editId ? dataState.lists.find(l => l.id === editId) : null;
+                document.getElementById('listModalId').value = existing?.id || '';
+                document.getElementById('listModalTitle').textContent = existing ? 'Renomear Lista' : 'Nova Lista';
+                document.getElementById('listNameInput').value = existing?.name || '';
+                this.openModal('listModal');
+                setTimeout(() => document.getElementById('listNameInput').focus(), 50);
+            },
+            saveListMeta(e) {
+                e.preventDefault();
+                const editId = document.getElementById('listModalId').value;
+                const name = document.getElementById('listNameInput').value.trim();
+                if (!name) return;
+
+                const existing = editId ? dataState.lists.find(l => l.id === editId) : null;
+                if (existing) {
+                    existing.name = name;
+                } else {
+                    const id = generateId('lst');
+                    dataState.lists.push({ id, name, items: [], createdAt: Date.now() });
+                    ui.activeListId = id;
+                }
+                this.closeModal('listModal');
+                saveState();
+                renderLists();
+                showToast(existing ? 'Lista renomeada!' : 'Lista criada!', 'success');
+            },
+            confirmDeleteList(id) {
+                const list = dataState.lists.find(l => l.id === id);
+                this.openConfirm('Excluir Lista', `Excluir "${list?.name || ''}" e todos os seus itens?`, () => {
+                    dataState.lists = dataState.lists.filter(l => l.id !== id);
+                    if (ui.activeListId === id) ui.activeListId = null;
+                    saveState();
+                    renderLists();
+                    showToast('Lista excluída.', 'info');
+                });
+            },
+            addListItem(e, listId) {
+                e.preventDefault();
+                const list = dataState.lists.find(l => l.id === listId);
+                if (!list) return;
+                const input = document.getElementById('newListItemText');
+                const text = input.value.trim();
+                if (!text) return;
+                list.items = list.items || [];
+                list.items.push({ id: generateId('li'), text, done: false });
+                saveState();
+                renderLists();
+                setTimeout(() => document.getElementById('newListItemText')?.focus(), 20);
+            },
+            toggleListItem(listId, itemId) {
+                const list = dataState.lists.find(l => l.id === listId);
+                if (!list) return;
+                const item = (list.items || []).find(i => i.id === itemId);
+                if (item) item.done = !item.done;
+                saveState();
+                renderLists();
+            },
+            deleteListItem(listId, itemId) {
+                const list = dataState.lists.find(l => l.id === listId);
+                if (!list) return;
+                list.items = (list.items || []).filter(i => i.id !== itemId);
+                saveState();
+                renderLists();
+            },
+            clearCheckedListItems(listId) {
+                const list = dataState.lists.find(l => l.id === listId);
+                if (!list) return;
+                list.items = (list.items || []).filter(i => !i.done);
+                saveState();
+                renderLists();
+                showToast('Itens marcados removidos!', 'info');
+            },
+
+            // --- PROJETOS ATIVOS ---
+            selectProject(id) {
+                ui.activeProjectId = id;
+                renderProjects();
+            },
+            openProjectModal(editId = null) {
+                const existing = editId ? dataState.projects.find(p => p.id === editId) : null;
+                document.getElementById('projectModalTitle').textContent = existing ? 'Editar Projeto' : 'Novo Projeto Ativo';
+                document.getElementById('projId').value = existing?.id || '';
+                document.getElementById('projName').value = existing?.name || '';
+                document.getElementById('projDesc').value = existing?.desc || '';
+                document.getElementById('projStatus').value = existing?.status || 'Ativo';
+                document.getElementById('projColor').value = existing?.color || '#7852ee';
+                this.openModal('projectModal');
+            },
+            saveProject(e) {
+                e.preventDefault();
+                const editId = document.getElementById('projId').value;
+                const existing = editId ? dataState.projects.find(p => p.id === editId) : null;
+                if (existing) {
+                    existing.name = document.getElementById('projName').value.trim();
+                    existing.desc = document.getElementById('projDesc').value.trim();
+                    existing.status = document.getElementById('projStatus').value;
+                    existing.color = document.getElementById('projColor').value;
+                } else {
+                    const id = generateId('prj');
+                    dataState.projects.push({
+                        id,
+                        name: document.getElementById('projName').value.trim(),
+                        desc: document.getElementById('projDesc').value.trim(),
+                        status: document.getElementById('projStatus').value,
+                        color: document.getElementById('projColor').value,
+                        features: [],
+                        createdAt: Date.now()
+                    });
+                    ui.activeProjectId = id;
+                }
+                this.closeModal('projectModal');
+                saveState();
+                renderProjects();
+                showToast(existing ? 'Projeto atualizado!' : 'Projeto criado!', 'success');
+            },
+            confirmDeleteProject(id) {
+                const p = dataState.projects.find(x => x.id === id);
+                this.openConfirm('Excluir Projeto', `Remover "${p?.name || ''}" e todas as suas features?`, () => {
+                    dataState.projects = dataState.projects.filter(x => x.id !== id);
+                    if (ui.activeProjectId === id) ui.activeProjectId = null;
+                    saveState();
+                    renderProjects();
+                    showToast('Projeto excluído.', 'info');
+                });
+            },
+            addProjectFeature(e, projId) {
+                e.preventDefault();
+                const proj = dataState.projects.find(p => p.id === projId);
+                if (!proj) return;
+                const title = document.getElementById('newFeatureTitle').value.trim();
+                const priority = document.getElementById('newFeaturePriority').value;
+                if (!title) return;
+                proj.features = proj.features || [];
+                proj.features.push({ id: generateId('ft'), title, priority, done: false });
+                saveState();
+                renderProjects();
+            },
+            toggleProjectFeature(projId, featId) {
+                const proj = dataState.projects.find(p => p.id === projId);
+                if (!proj) return;
+                const feat = (proj.features || []).find(f => f.id === featId);
+                if (feat) feat.done = !feat.done;
+                saveState();
+                renderProjects();
+            },
+            deleteProjectFeature(projId, featId) {
+                const proj = dataState.projects.find(p => p.id === projId);
+                if (!proj) return;
+                proj.features = (proj.features || []).filter(f => f.id !== featId);
+                saveState();
+                renderProjects();
+            },
+
+            // --- CALENDÁRIO ---
+            shiftCalendarMonth(delta) {
+                let m = ui.calendarMonth + delta;
+                let y = ui.calendarYear;
+                if (m < 0) { m = 11; y--; }
+                else if (m > 11) { m = 0; y++; }
+                ui.calendarMonth = m;
+                ui.calendarYear = y;
+                renderCalendar();
+            },
+            goToToday() {
+                const now = new Date();
+                ui.calendarYear = now.getFullYear();
+                ui.calendarMonth = now.getMonth();
+                ui.selectedDateStr = toDateStr(now);
+                renderCalendar();
+            },
+            selectCalendarDate(dateStr) {
+                ui.selectedDateStr = dateStr;
+                renderCalendar();
+            },
+            jumpToEventDate(dateStr) {
+                const [y, m] = dateStr.split('-').map(Number);
+                ui.calendarYear = y;
+                ui.calendarMonth = m - 1;
+                ui.selectedDateStr = dateStr;
+                renderCalendar();
+            },
+            openEventModal(editId = null) {
+                const existing = editId ? dataState.events.find(ev => ev.id === editId) : null;
+                document.getElementById('eventModalTitle').textContent = existing ? 'Editar Compromisso' : 'Novo Compromisso';
+                document.getElementById('evId').value = existing?.id || '';
+                document.getElementById('evTitle').value = existing?.title || '';
+                document.getElementById('evDate').value = existing?.date || ui.selectedDateStr;
+                document.getElementById('evTime').value = existing?.time || '';
+                document.getElementById('evColor').value = existing?.color || '#7852ee';
+                document.getElementById('evNotes').value = existing?.notes || '';
+                this.openModal('eventModal');
+            },
+            saveEvent(e) {
+                e.preventDefault();
+                const editId = document.getElementById('evId').value;
+                const existing = editId ? dataState.events.find(ev => ev.id === editId) : null;
+                const date = document.getElementById('evDate').value;
+                ui.selectedDateStr = date;
+
+                const evObj = {
+                    id: editId || generateId('ev'),
+                    title: document.getElementById('evTitle').value.trim(),
+                    date,
+                    time: document.getElementById('evTime').value,
+                    color: document.getElementById('evColor').value,
+                    notes: document.getElementById('evNotes').value.trim()
+                };
+
+                if (existing) {
+                    const idx = dataState.events.findIndex(x => x.id === editId);
+                    dataState.events[idx] = evObj;
+                } else {
+                    dataState.events.push(evObj);
+                }
+
+                this.closeModal('eventModal');
+                saveState();
+                renderCalendar();
+                showToast('Compromisso salvo!', 'success');
+            },
+            confirmDeleteEvent(id) {
+                this.openConfirm('Excluir Compromisso', 'Remover este compromisso do calendário?', () => {
+                    dataState.events = dataState.events.filter(ev => ev.id !== id);
+                    saveState();
+                    renderCalendar();
+                    showToast('Compromisso excluído.', 'info');
+                });
+            },
+
+            // --- LEITURAS ---
+            renderReadings,
+            autoSuggestReadingUnit() {
+                const type = document.getElementById('rdType').value;
+                document.getElementById('rdUnit').value = type === 'Livro' ? 'Páginas' : 'Capítulos';
+            },
+            openReadingModal(editId = null) {
+                const existing = editId ? dataState.readings.find(r => r.id === editId) : null;
+                document.getElementById('readingModalTitle').textContent = existing ? 'Editar Obra' : 'Nova Obra';
+                document.getElementById('rdId').value = existing?.id || '';
+                document.getElementById('rdTitle').value = existing?.title || '';
+                document.getElementById('rdType').value = existing?.type || 'Mangá';
+                document.getElementById('rdUnit').value = existing?.unit || (existing?.type === 'Livro' ? 'Páginas' : 'Capítulos');
+                document.getElementById('rdStatus').value = existing?.status || 'Lendo';
+                document.getElementById('rdCurrent').value = existing?.current ?? 0;
+                document.getElementById('rdTotal').value = existing?.total || '';
+                this.openModal('readingModal');
+            },
+            saveReading(e) {
+                e.preventDefault();
+                const editId = document.getElementById('rdId').value;
+                const existing = editId ? dataState.readings.find(r => r.id === editId) : null;
+                const current = Math.max(0, Number(document.getElementById('rdCurrent').value || 0));
+                const total = Math.max(0, Number(document.getElementById('rdTotal').value || 0));
+
+                const obj = {
+                    id: editId || generateId('rd'),
+                    title: document.getElementById('rdTitle').value.trim(),
+                    type: document.getElementById('rdType').value,
+                    unit: document.getElementById('rdUnit').value,
+                    status: document.getElementById('rdStatus').value,
+                    current,
+                    total,
+                    updatedAt: Date.now()
+                };
+
+                if (existing) {
+                    const idx = dataState.readings.findIndex(r => r.id === editId);
+                    dataState.readings[idx] = obj;
+                } else {
+                    dataState.readings.push(obj);
+                }
+
+                this.closeModal('readingModal');
+                saveState();
+                renderReadings();
+                showToast('Obra salva!', 'success');
+            },
+            stepReading(id, delta) {
+                const r = dataState.readings.find(x => x.id === id);
+                if (!r) return;
+                r.current = Math.max(0, Number(r.current || 0) + delta);
+                if (r.total > 0 && r.current >= r.total) r.status = 'Concluído';
+                else if (r.status === 'Quero Ler' && r.current > 0) r.status = 'Lendo';
+                r.updatedAt = Date.now();
+                saveState();
+                renderReadings();
+            },
+            setReadingProgress(id, rawValue) {
+                const r = dataState.readings.find(x => x.id === id);
+                if (!r) return;
+                r.current = Math.max(0, parseInt(rawValue, 10) || 0);
+                if (r.total > 0 && r.current >= r.total) r.status = 'Concluído';
+                r.updatedAt = Date.now();
+                saveState();
+                renderReadings();
+            },
+            confirmDeleteReading(id) {
+                const r = dataState.readings.find(x => x.id === id);
+                this.openConfirm('Excluir Leitura', `Remover "${r?.title || ''}" da sua lista?`, () => {
+                    dataState.readings = dataState.readings.filter(x => x.id !== id);
+                    saveState();
+                    renderReadings();
+                    showToast('Obra removida.', 'info');
+                });
+            }
+        };
+
+        // Redesenha curvas SVG ao redimensionar a janela
+        window.addEventListener('resize', () => {
+            if (ui.activeModule === 'kanban' && ui.kanbanViewMode === 'canvas') {
+                drawKanbanLinks();
+            }
+        });
+
+        // =========================================================
+        // 15. INICIALIZAÇÃO
+        // =========================================================
+        loadLocalData();
+        renderAll();
+
+        // Conecta automaticamente ao Firebase embutido usando a syncKey salva (ou "meu-hub-2026")
+        connectToFirebase(getStoredSyncKey(), true, false);
+    </script>
+    <script>
+  if ('serviceWorker' in navigator) {
+    window.addEventListener('load', () => {
+      navigator.serviceWorker.register('./sw.js');
+    });
+  }
+</script>
+</body>
+</html>
