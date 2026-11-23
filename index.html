@@ -4,7 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>Kanban Companion Hub</title>
-
+a
     <!-- =========================================================
          CONFIGURAÇÃO PWA (INSTALÁVEL NO CELULAR ANDROID / iOS)
          ========================================================= -->
@@ -18,14 +18,15 @@
     <!-- Tailwind CSS CDN -->
     <script src="https://cdn.tailwindcss.com"></script>
 
-    <!-- Fontes Google: Inter e JetBrains Mono -->
+    <!-- Fontes Google para os 12 temas: Inter, JetBrains Mono, Cinzel, Crimson Pro, Space Grotesk e VT323 -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;600;700&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@600;700&family=Crimson+Pro:ital,wght@0,400;0,600;0,700;1,400&family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;600;700&family=Space+Grotesk:wght@400;500;600;700&family=VT323&display=swap" rel="stylesheet">
 
     <style>
         /* =========================================================
-           SISTEMA DE 6 TEMAS DE APARÊNCIA (CSS CUSTOM PROPERTIES)
+           SISTEMA DE 12 TEMAS DE APARÊNCIA (CORES, FONTES, CANTOS,
+           BORDAS, SOMBRAS E TEXTURAS DE FUNDO)
            ========================================================= */
         :root,
         [data-theme="obsidian"] {
@@ -44,6 +45,16 @@
             --accent-text: #a78bfa;
             --accent-contrast: #ffffff;
             --dot-color: #35353c;
+            --font-body: 'Inter', sans-serif;
+            --font-heading: 'Inter', sans-serif;
+            --font-mono: 'JetBrains Mono', monospace;
+            --radius-card: 10px;
+            --radius-btn: 8px;
+            --radius-input: 8px;
+            --border-width: 1px;
+            --border-style: solid;
+            --card-shadow: 0 4px 16px rgba(0, 0, 0, 0.28);
+            --btn-shadow: none;
             --shadow-soft: 0 4px 16px rgba(0, 0, 0, 0.28);
             --shadow-strong: 0 20px 44px rgba(0, 0, 0, 0.62);
             --overlay-bg: rgba(0, 0, 0, 0.76);
@@ -55,98 +66,138 @@
 
         [data-theme="vinho"] {
             color-scheme: dark;
-            --bg-base: #140f12;
-            --bg-panel: #1d1519;
-            --bg-panel-alt: #181115;
-            --bg-input: #100b0e;
-            --bg-hover: #2b1e25;
-            --border-color: #3a2630;
-            --border-strong: #543746;
+            --bg-base: #11080c;
+            --bg-panel: #1b0e14;
+            --bg-panel-alt: #160b10;
+            --bg-input: #0d0609;
+            --bg-hover: #2b1520;
+            --border-color: #421c2c;
+            --border-strong: #6e2a45;
             --text-main: #f6eaee;
-            --text-muted: #b894a0;
-            --accent: #b91c3c;
-            --accent-hover: #9f1239;
-            --accent-text: #fb7185;
+            --text-muted: #c7a6b1;
+            --accent: #d11a48;
+            --accent-hover: #ad1239;
+            --accent-text: #e2b46d;
             --accent-contrast: #ffffff;
-            --dot-color: #38232d;
-            --shadow-soft: 0 4px 16px rgba(0, 0, 0, 0.36);
-            --shadow-strong: 0 20px 44px rgba(0, 0, 0, 0.68);
-            --overlay-bg: rgba(12, 6, 8, 0.82);
+            --dot-color: #4f1d31;
+            --font-body: 'Inter', sans-serif;
+            --font-heading: 'Cinzel', serif;
+            --font-mono: 'JetBrains Mono', monospace;
+            --radius-card: 6px;
+            --radius-btn: 6px;
+            --radius-input: 6px;
+            --border-width: 1px;
+            --border-style: solid;
+            --card-shadow: 0 6px 22px rgba(209, 26, 72, 0.14), 0 2px 8px rgba(0, 0, 0, 0.5);
+            --btn-shadow: 0 2px 12px rgba(209, 26, 72, 0.25);
+            --shadow-soft: 0 6px 22px rgba(209, 26, 72, 0.14);
+            --shadow-strong: 0 20px 48px rgba(0, 0, 0, 0.75);
+            --overlay-bg: rgba(10, 3, 6, 0.84);
             --danger: #fb7185;
             --status-todo: #9f7c87;
-            --status-doing: #f59e0b;
+            --status-doing: #e2b46d;
             --status-done: #10b981;
         }
 
         [data-theme="crt"] {
             color-scheme: dark;
-            --bg-base: #0b110d;
-            --bg-panel: #111a14;
-            --bg-panel-alt: #0e1611;
-            --bg-input: #080d0a;
-            --bg-hover: #18291e;
-            --border-color: #213d2b;
-            --border-strong: #2f5a3e;
-            --text-main: #dcfce7;
-            --text-muted: #7dd3a2;
-            --accent: #22c55e;
-            --accent-hover: #16a34a;
-            --accent-text: #4ade80;
-            --accent-contrast: #052e16;
-            --dot-color: #1c3826;
-            --shadow-soft: 0 4px 16px rgba(0, 0, 0, 0.42);
-            --shadow-strong: 0 20px 44px rgba(0, 0, 0, 0.72);
-            --overlay-bg: rgba(4, 10, 6, 0.84);
-            --danger: #f87171;
-            --status-todo: #5b856d;
-            --status-doing: #f59e0b;
-            --status-done: #22c55e;
+            --bg-base: #050b07;
+            --bg-panel: #09140d;
+            --bg-panel-alt: #07100a;
+            --bg-input: #030805;
+            --bg-hover: #102417;
+            --border-color: #164a28;
+            --border-strong: #00cc52;
+            --text-main: #b7ffce;
+            --text-muted: #52b877;
+            --accent: #00ff66;
+            --accent-hover: #00d957;
+            --accent-text: #00ff66;
+            --accent-contrast: #031509;
+            --dot-color: rgba(0, 255, 102, 0.14);
+            --font-body: 'JetBrains Mono', monospace;
+            --font-heading: 'VT323', 'JetBrains Mono', monospace;
+            --font-mono: 'JetBrains Mono', monospace;
+            --radius-card: 0px;
+            --radius-btn: 0px;
+            --radius-input: 0px;
+            --border-width: 1px;
+            --border-style: solid;
+            --card-shadow: 0 0 14px rgba(0, 255, 102, 0.14), inset 0 0 8px rgba(0, 255, 102, 0.04);
+            --btn-shadow: 0 0 12px rgba(0, 255, 102, 0.28);
+            --shadow-soft: 0 0 14px rgba(0, 255, 102, 0.14);
+            --shadow-strong: 0 0 28px rgba(0, 255, 102, 0.24);
+            --overlay-bg: rgba(2, 8, 4, 0.88);
+            --danger: #ff5c5c;
+            --status-todo: #3f8a5b;
+            --status-doing: #facc15;
+            --status-done: #00ff66;
         }
 
         [data-theme="nord"] {
             color-scheme: dark;
-            --bg-base: #1b212c;
-            --bg-panel: #232a37;
-            --bg-panel-alt: #1f2632;
-            --bg-input: #161b24;
-            --bg-hover: #2d3647;
-            --border-color: #364257;
-            --border-strong: #4a5a75;
-            --text-main: #e5edf7;
-            --text-muted: #98abc4;
-            --accent: #5e81ac;
-            --accent-hover: #4c6d96;
+            --bg-base: #2e3440;
+            --bg-panel: #3b4252;
+            --bg-panel-alt: #353c4a;
+            --bg-input: #272c36;
+            --bg-hover: #434c5e;
+            --border-color: rgba(216, 222, 233, 0.1);
+            --border-strong: rgba(136, 192, 208, 0.35);
+            --text-main: #eceff4;
+            --text-muted: #b0bed1;
+            --accent: #88c0d0;
+            --accent-hover: #6faec2;
             --accent-text: #88c0d0;
-            --accent-contrast: #ffffff;
-            --dot-color: #313d52;
-            --shadow-soft: 0 4px 16px rgba(0, 0, 0, 0.32);
-            --shadow-strong: 0 20px 44px rgba(0, 0, 0, 0.62);
-            --overlay-bg: rgba(11, 15, 22, 0.8);
-            --danger: #f87171;
-            --status-todo: #7c8fa8;
-            --status-doing: #f59e0b;
-            --status-done: #10b981;
+            --accent-contrast: #1e242e;
+            --dot-color: rgba(136, 192, 208, 0.18);
+            --font-body: 'Inter', sans-serif;
+            --font-heading: 'Inter', sans-serif;
+            --font-mono: 'JetBrains Mono', monospace;
+            --radius-card: 16px;
+            --radius-btn: 12px;
+            --radius-input: 12px;
+            --border-width: 1px;
+            --border-style: solid;
+            --card-shadow: 0 8px 24px rgba(15, 20, 28, 0.28);
+            --btn-shadow: none;
+            --shadow-soft: 0 8px 24px rgba(15, 20, 28, 0.28);
+            --shadow-strong: 0 22px 44px rgba(15, 20, 28, 0.55);
+            --overlay-bg: rgba(20, 24, 32, 0.76);
+            --danger: #bf616a;
+            --status-todo: #81a1c1;
+            --status-doing: #ebcb8b;
+            --status-done: #a3be8c;
         }
 
         [data-theme="ambar"] {
             color-scheme: dark;
-            --bg-base: #1a1815;
-            --bg-panel: #24211c;
-            --bg-panel-alt: #1f1c18;
-            --bg-input: #141210;
-            --bg-hover: #302c25;
-            --border-color: #3e382f;
-            --border-strong: #574e41;
+            --bg-base: #171511;
+            --bg-panel: #211e18;
+            --bg-panel-alt: #1c1914;
+            --bg-input: #11100d;
+            --bg-hover: #2d2820;
+            --border-color: #3d372c;
+            --border-strong: #6b5d47;
             --text-main: #f4efe6;
-            --text-muted: #b0a392;
-            --accent: #d97706;
-            --accent-hover: #b45309;
+            --text-muted: #b3a590;
+            --accent: #f59e0b;
+            --accent-hover: #d97706;
             --accent-text: #fbbf24;
-            --accent-contrast: #1c1203;
-            --dot-color: #383229;
-            --shadow-soft: 0 4px 16px rgba(0, 0, 0, 0.36);
-            --shadow-strong: 0 20px 44px rgba(0, 0, 0, 0.65);
-            --overlay-bg: rgba(14, 11, 8, 0.82);
+            --accent-contrast: #171207;
+            --dot-color: rgba(245, 158, 11, 0.12);
+            --font-body: 'Space Grotesk', sans-serif;
+            --font-heading: 'Space Grotesk', sans-serif;
+            --font-mono: 'JetBrains Mono', monospace;
+            --radius-card: 2px;
+            --radius-btn: 2px;
+            --radius-input: 2px;
+            --border-width: 2px;
+            --border-style: solid;
+            --card-shadow: 0 4px 14px rgba(0, 0, 0, 0.45);
+            --btn-shadow: none;
+            --shadow-soft: 0 4px 14px rgba(0, 0, 0, 0.45);
+            --shadow-strong: 0 18px 40px rgba(0, 0, 0, 0.72);
+            --overlay-bg: rgba(12, 10, 7, 0.84);
             --danger: #f87171;
             --status-todo: #857a6d;
             --status-doing: #f59e0b;
@@ -155,31 +206,251 @@
 
         [data-theme="claro"] {
             color-scheme: light;
-            --bg-base: #f4f4f5;
+            --bg-base: #f5f6f8;
             --bg-panel: #ffffff;
-            --bg-panel-alt: #fafafa;
-            --bg-input: #e4e4e7;
-            --bg-hover: #e4e4e7;
-            --border-color: #d4d4d8;
-            --border-strong: #a1a1aa;
+            --bg-panel-alt: #fbfcfd;
+            --bg-input: #eef0f4;
+            --bg-hover: #e5e8ef;
+            --border-color: #dce0e8;
+            --border-strong: #b8c0d0;
             --text-main: #18181b;
-            --text-muted: #52525b;
-            --accent: #6d28d9;
-            --accent-hover: #5b21b6;
-            --accent-text: #6d28d9;
+            --text-muted: #525866;
+            --accent: #5b46e8;
+            --accent-hover: #4833d4;
+            --accent-text: #5b46e8;
             --accent-contrast: #ffffff;
-            --dot-color: #c7c7cf;
-            --shadow-soft: 0 4px 14px rgba(24, 24, 27, 0.08);
-            --shadow-strong: 0 20px 44px rgba(24, 24, 27, 0.18);
-            --overlay-bg: rgba(24, 24, 27, 0.48);
+            --dot-color: #cfd5e0;
+            --font-body: 'Inter', sans-serif;
+            --font-heading: 'Inter', sans-serif;
+            --font-mono: 'JetBrains Mono', monospace;
+            --radius-card: 10px;
+            --radius-btn: 8px;
+            --radius-input: 8px;
+            --border-width: 1px;
+            --border-style: solid;
+            --card-shadow: 0 4px 14px rgba(24, 24, 27, 0.06);
+            --btn-shadow: 0 2px 6px rgba(91, 70, 232, 0.18);
+            --shadow-soft: 0 4px 14px rgba(24, 24, 27, 0.06);
+            --shadow-strong: 0 20px 44px rgba(24, 24, 27, 0.16);
+            --overlay-bg: rgba(24, 24, 27, 0.45);
             --danger: #dc2626;
             --status-todo: #71717a;
             --status-doing: #d97706;
             --status-done: #059669;
         }
 
+        [data-theme="grimorio"] {
+            color-scheme: light;
+            --bg-base: #f2e8d5;
+            --bg-panel: #fbf5e9;
+            --bg-panel-alt: #f6eedc;
+            --bg-input: #ece0c8;
+            --bg-hover: #e6d6b8;
+            --border-color: #cbb894;
+            --border-strong: #a89067;
+            --text-main: #2c1e16;
+            --text-muted: #6e5846;
+            --accent: #9e2a2b;
+            --accent-hover: #7f1f20;
+            --accent-text: #9e2a2b;
+            --accent-contrast: #fbf5e9;
+            --dot-color: rgba(110, 88, 70, 0.2);
+            --font-body: 'Crimson Pro', Georgia, serif;
+            --font-heading: 'Crimson Pro', Georgia, serif;
+            --font-mono: 'JetBrains Mono', monospace;
+            --radius-card: 4px;
+            --radius-btn: 4px;
+            --radius-input: 4px;
+            --border-width: 3px;
+            --border-style: double;
+            --card-shadow: 0 3px 10px rgba(44, 30, 22, 0.12);
+            --btn-shadow: none;
+            --shadow-soft: 0 3px 10px rgba(44, 30, 22, 0.12);
+            --shadow-strong: 0 18px 36px rgba(44, 30, 22, 0.28);
+            --overlay-bg: rgba(34, 22, 14, 0.56);
+            --danger: #9e2a2b;
+            --status-todo: #7d6856;
+            --status-doing: #b45309;
+            --status-done: #2d6a4f;
+        }
+
+        [data-theme="synthwave"] {
+            color-scheme: dark;
+            --bg-base: #0d051a;
+            --bg-panel: #160a2b;
+            --bg-panel-alt: #120724;
+            --bg-input: #090314;
+            --bg-hover: #241045;
+            --border-color: #3d1c6e;
+            --border-strong: #ff2a85;
+            --text-main: #f8f0ff;
+            --text-muted: #b49bd4;
+            --accent: #ff2a85;
+            --accent-hover: #e01b70;
+            --accent-text: #00f0ff;
+            --accent-contrast: #ffffff;
+            --dot-color: rgba(0, 240, 255, 0.16);
+            --font-body: 'Space Grotesk', sans-serif;
+            --font-heading: 'Space Grotesk', sans-serif;
+            --font-mono: 'JetBrains Mono', monospace;
+            --radius-card: 8px;
+            --radius-btn: 8px;
+            --radius-input: 8px;
+            --border-width: 1px;
+            --border-style: solid;
+            --card-shadow: 0 0 18px rgba(255, 42, 133, 0.18), 0 0 6px rgba(0, 240, 255, 0.12);
+            --btn-shadow: 0 0 14px rgba(255, 42, 133, 0.4);
+            --shadow-soft: 0 0 18px rgba(255, 42, 133, 0.18);
+            --shadow-strong: 0 0 36px rgba(255, 42, 133, 0.34);
+            --overlay-bg: rgba(7, 2, 15, 0.84);
+            --danger: #ff4d6d;
+            --status-todo: #8c70b8;
+            --status-doing: #facc15;
+            --status-done: #00f0ff;
+        }
+
+        [data-theme="blueprint"] {
+            color-scheme: dark;
+            --bg-base: #0a1d37;
+            --bg-panel: #0f294d;
+            --bg-panel-alt: #0c2342;
+            --bg-input: #07162b;
+            --bg-hover: #163969;
+            --border-color: rgba(56, 189, 248, 0.34);
+            --border-strong: #38bdf8;
+            --text-main: #e6f6ff;
+            --text-muted: #8ecae6;
+            --accent: #38bdf8;
+            --accent-hover: #0ea5e9;
+            --accent-text: #7dd3fc;
+            --accent-contrast: #061529;
+            --dot-color: rgba(56, 189, 248, 0.18);
+            --font-body: 'JetBrains Mono', monospace;
+            --font-heading: 'JetBrains Mono', monospace;
+            --font-mono: 'JetBrains Mono', monospace;
+            --radius-card: 2px;
+            --radius-btn: 2px;
+            --radius-input: 2px;
+            --border-width: 1px;
+            --border-style: solid;
+            --card-shadow: 0 4px 16px rgba(2, 12, 27, 0.45);
+            --btn-shadow: none;
+            --shadow-soft: 0 4px 16px rgba(2, 12, 27, 0.45);
+            --shadow-strong: 0 18px 42px rgba(2, 12, 27, 0.72);
+            --overlay-bg: rgba(4, 14, 28, 0.84);
+            --danger: #fb7185;
+            --status-todo: #7dd3fc;
+            --status-doing: #fbbf24;
+            --status-done: #34d399;
+        }
+
+        [data-theme="matcha"] {
+            color-scheme: dark;
+            --bg-base: #101a14;
+            --bg-panel: #17251d;
+            --bg-panel-alt: #142019;
+            --bg-input: #0c140f;
+            --bg-hover: #1f3327;
+            --border-color: #294233;
+            --border-strong: #467359;
+            --text-main: #e8f3e8;
+            --text-muted: #9db8a4;
+            --accent: #74c69d;
+            --accent-hover: #52b788;
+            --accent-text: #95d5b2;
+            --accent-contrast: #0c1811;
+            --dot-color: rgba(116, 198, 157, 0.18);
+            --font-body: 'Inter', sans-serif;
+            --font-heading: 'Inter', sans-serif;
+            --font-mono: 'JetBrains Mono', monospace;
+            --radius-card: 18px;
+            --radius-btn: 14px;
+            --radius-input: 14px;
+            --border-width: 1px;
+            --border-style: solid;
+            --card-shadow: 0 8px 24px rgba(5, 12, 8, 0.34);
+            --btn-shadow: none;
+            --shadow-soft: 0 8px 24px rgba(5, 12, 8, 0.34);
+            --shadow-strong: 0 22px 46px rgba(5, 12, 8, 0.65);
+            --overlay-bg: rgba(7, 14, 9, 0.8);
+            --danger: #f87171;
+            --status-todo: #7b9683;
+            --status-doing: #eab308;
+            --status-done: #74c69d;
+        }
+
+        [data-theme="brutalista"] {
+            color-scheme: light;
+            --bg-base: #fffdf2;
+            --bg-panel: #ffffff;
+            --bg-panel-alt: #fff9db;
+            --bg-input: #ffffff;
+            --bg-hover: #ffe8a3;
+            --border-color: #111111;
+            --border-strong: #111111;
+            --text-main: #111111;
+            --text-muted: #444444;
+            --accent: #ff521b;
+            --accent-hover: #e03e0b;
+            --accent-text: #ff521b;
+            --accent-contrast: #ffffff;
+            --dot-color: rgba(17, 17, 17, 0.22);
+            --font-body: 'Space Grotesk', sans-serif;
+            --font-heading: 'Space Grotesk', sans-serif;
+            --font-mono: 'JetBrains Mono', monospace;
+            --radius-card: 2px;
+            --radius-btn: 2px;
+            --radius-input: 2px;
+            --border-width: 2px;
+            --border-style: solid;
+            --card-shadow: 4px 4px 0px #111111;
+            --btn-shadow: 3px 3px 0px #111111;
+            --shadow-soft: 4px 4px 0px #111111;
+            --shadow-strong: 8px 8px 0px #111111;
+            --overlay-bg: rgba(17, 17, 17, 0.6);
+            --danger: #dc2626;
+            --status-todo: #555555;
+            --status-doing: #f59e0b;
+            --status-done: #16a34a;
+        }
+
+        [data-theme="eink"] {
+            color-scheme: light;
+            --bg-base: #ffffff;
+            --bg-panel: #ffffff;
+            --bg-panel-alt: #f7f7f7;
+            --bg-input: #ffffff;
+            --bg-hover: #eaeaea;
+            --border-color: #000000;
+            --border-strong: #000000;
+            --text-main: #000000;
+            --text-muted: #333333;
+            --accent: #000000;
+            --accent-hover: #222222;
+            --accent-text: #000000;
+            --accent-contrast: #ffffff;
+            --dot-color: rgba(0, 0, 0, 0.25);
+            --font-body: 'Crimson Pro', Georgia, serif;
+            --font-heading: 'Crimson Pro', Georgia, serif;
+            --font-mono: 'JetBrains Mono', monospace;
+            --radius-card: 2px;
+            --radius-btn: 2px;
+            --radius-input: 2px;
+            --border-width: 1.5px;
+            --border-style: solid;
+            --card-shadow: none;
+            --btn-shadow: none;
+            --shadow-soft: none;
+            --shadow-strong: 4px 4px 0px #000000;
+            --overlay-bg: rgba(0, 0, 0, 0.55);
+            --danger: #000000;
+            --status-todo: #555555;
+            --status-doing: #222222;
+            --status-done: #000000;
+        }
+
         /* =========================================================
-           ESTILOS GLOBAIS E CLASSES SEMÂNTICAS
+           ESTILOS GLOBAIS E CLASSES SEMÂNTICAS ADAPTATIVAS
            ========================================================= */
         * {
             box-sizing: border-box;
@@ -189,7 +460,7 @@
         body {
             background-color: var(--bg-base);
             color: var(--text-main);
-            font-family: 'Inter', sans-serif;
+            font-family: var(--font-body);
             margin: 0;
             padding: 0;
             height: 100dvh;
@@ -197,12 +468,60 @@
             transition: background-color 0.2s ease, color 0.2s ease;
         }
 
-        .mono { font-family: 'JetBrains Mono', monospace; }
+        h1, h2, h3, h4 {
+            font-family: var(--font-heading);
+        }
+
+        [data-theme="crt"] h1,
+        [data-theme="crt"] h2,
+        [data-theme="crt"] h3 {
+            letter-spacing: 0.04em;
+            text-shadow: 0 0 8px rgba(0, 255, 102, 0.45);
+        }
+
+        [data-theme="vinho"] h1,
+        [data-theme="vinho"] h2,
+        [data-theme="vinho"] h3 {
+            letter-spacing: 0.03em;
+        }
+
+        [data-theme="brutalista"] h1,
+        [data-theme="brutalista"] h2,
+        [data-theme="brutalista"] h3,
+        [data-theme="brutalista"] button {
+            font-weight: 700;
+        }
+
+        [data-theme="grimorio"] body,
+        [data-theme="eink"] body {
+            font-size: 15px;
+        }
+
+        .mono { font-family: var(--font-mono); }
+
+        /* Overlay de Scanlines exclusivo do Terminal CRT */
+        #crtScanlinesOverlay {
+            display: none;
+            position: fixed;
+            inset: 0;
+            pointer-events: none;
+            z-index: 9999;
+            background: repeating-linear-gradient(
+                to bottom,
+                rgba(0, 0, 0, 0) 0px,
+                rgba(0, 0, 0, 0) 2px,
+                rgba(0, 0, 0, 0.22) 3px,
+                rgba(0, 255, 102, 0.03) 4px
+            );
+        }
+        [data-theme="crt"] #crtScanlinesOverlay {
+            display: block;
+        }
 
         /* Scrollbars suaves */
         ::-webkit-scrollbar { width: 7px; height: 7px; }
         ::-webkit-scrollbar-track { background: var(--bg-base); }
-        ::-webkit-scrollbar-thumb { background: var(--border-strong); border-radius: 999px; }
+        ::-webkit-scrollbar-thumb { background: var(--border-strong); border-radius: var(--radius-btn); }
         ::-webkit-scrollbar-thumb:hover { background: var(--text-muted); }
 
         .theme-base { background-color: var(--bg-base); }
@@ -214,26 +533,29 @@
         .theme-text { color: var(--text-main); }
         .theme-muted { color: var(--text-muted); }
         .theme-accent-text { color: var(--accent-text); }
-        .theme-shadow { box-shadow: var(--shadow-soft); }
+        .theme-shadow { box-shadow: var(--card-shadow); }
         .theme-modal-shadow { box-shadow: var(--shadow-strong); }
         .theme-overlay { background-color: var(--overlay-bg); }
 
         .theme-surface-card {
             background-color: var(--bg-panel);
-            border: 1px solid var(--border-color);
-            box-shadow: var(--shadow-soft);
+            border: var(--border-width) var(--border-style) var(--border-color);
+            border-radius: var(--radius-card) !important;
+            box-shadow: var(--card-shadow);
         }
 
         .theme-sub-card {
             background-color: var(--bg-input);
-            border: 1px solid var(--border-color);
+            border: var(--border-width) solid var(--border-color);
+            border-radius: var(--radius-btn) !important;
         }
 
         .theme-hover:hover { background-color: var(--bg-hover); }
 
         .input-themed {
             background-color: var(--bg-input);
-            border: 1px solid var(--border-color);
+            border: var(--border-width) solid var(--border-color);
+            border-radius: var(--radius-input) !important;
             color: var(--text-main);
             transition: border-color 0.16s ease, box-shadow 0.16s ease;
         }
@@ -250,15 +572,28 @@
         .btn-primary {
             background-color: var(--accent);
             color: var(--accent-contrast);
-            transition: background-color 0.16s ease, transform 0.12s ease;
+            border: var(--border-width) solid transparent;
+            border-radius: var(--radius-btn) !important;
+            box-shadow: var(--btn-shadow);
+            transition: background-color 0.16s ease, transform 0.12s ease, box-shadow 0.15s ease;
+        }
+        [data-theme="brutalista"] .btn-primary {
+            border-color: #111111;
         }
         .btn-primary:hover { background-color: var(--accent-hover); }
         .btn-primary:active { transform: scale(0.97); }
+        [data-theme="brutalista"] .btn-primary:active,
+        [data-theme="brutalista"] .btn-secondary:active {
+            transform: translate(2px, 2px);
+            box-shadow: 1px 1px 0px #111111;
+        }
 
         .btn-secondary {
             background-color: var(--bg-input);
             color: var(--text-main);
-            border: 1px solid var(--border-color);
+            border: var(--border-width) solid var(--border-color);
+            border-radius: var(--radius-btn) !important;
+            box-shadow: var(--btn-shadow);
             transition: background-color 0.16s ease, border-color 0.16s ease;
         }
         .btn-secondary:hover {
@@ -268,6 +603,7 @@
 
         .btn-ghost {
             color: var(--text-muted);
+            border-radius: var(--radius-btn) !important;
             transition: background-color 0.15s ease, color 0.15s ease;
         }
         .btn-ghost:hover {
@@ -277,6 +613,7 @@
 
         .btn-danger-ghost {
             color: var(--text-muted);
+            border-radius: var(--radius-btn) !important;
             transition: background-color 0.15s ease, color 0.15s ease;
         }
         .btn-danger-ghost:hover {
@@ -285,7 +622,8 @@
         }
 
         .btn-danger-outline {
-            border: 1px solid color-mix(in srgb, var(--danger) 42%, transparent);
+            border: var(--border-width) solid color-mix(in srgb, var(--danger) 55%, transparent);
+            border-radius: var(--radius-btn) !important;
             color: var(--danger);
             transition: background-color 0.15s ease;
         }
@@ -296,16 +634,17 @@
         .tag-pill {
             background-color: color-mix(in srgb, var(--accent) 16%, transparent);
             color: var(--accent-text);
-            border: 1px solid color-mix(in srgb, var(--accent) 36%, transparent);
+            border: 1px solid color-mix(in srgb, var(--accent) 38%, transparent);
         }
 
         .nav-item-active {
             background-color: color-mix(in srgb, var(--accent) 16%, transparent);
             color: var(--text-main);
-            border-color: color-mix(in srgb, var(--accent) 45%, transparent);
+            border-color: color-mix(in srgb, var(--accent) 55%, transparent);
+            border-radius: var(--radius-btn) !important;
         }
 
-        /* Badges de Redes e Prioridades (alto contraste nos temas claro e escuro) */
+        /* Badges de Redes, Status e Prioridades (alto contraste nos temas claros, escuros e E-Ink) */
         .badge-tiktok  { background-color: color-mix(in srgb, #06b6d4 16%, transparent); color: #0e7490; border: 1px solid color-mix(in srgb, #06b6d4 40%, transparent); }
         .badge-insta   { background-color: color-mix(in srgb, #ec4899 16%, transparent); color: #be185d; border: 1px solid color-mix(in srgb, #ec4899 40%, transparent); }
         .badge-yt      { background-color: color-mix(in srgb, #ef4444 16%, transparent); color: #b91c1c; border: 1px solid color-mix(in srgb, #ef4444 40%, transparent); }
@@ -316,21 +655,93 @@
         .badge-amber   { background-color: color-mix(in srgb, #f59e0b 16%, transparent); color: #b45309; border: 1px solid color-mix(in srgb, #f59e0b 40%, transparent); }
         .badge-red     { background-color: color-mix(in srgb, #ef4444 16%, transparent); color: #b91c1c; border: 1px solid color-mix(in srgb, #ef4444 40%, transparent); }
         .badge-sky     { background-color: color-mix(in srgb, #0ea5e9 16%, transparent); color: #0369a1; border: 1px solid color-mix(in srgb, #0ea5e9 40%, transparent); }
+        .badge-ongoing { background-color: color-mix(in srgb, #a855f7 18%, transparent); color: #7e22ce; border: 1px solid color-mix(in srgb, #a855f7 48%, transparent); }
 
-        :root:not([data-theme="claro"]) .badge-tiktok  { color: #22d3ee; }
-        :root:not([data-theme="claro"]) .badge-insta   { color: #f472b6; }
-        :root:not([data-theme="claro"]) .badge-yt      { color: #f87171; }
-        :root:not([data-theme="claro"]) .badge-x       { color: #38bdf8; }
-        :root:not([data-theme="claro"]) .badge-emerald { color: #34d399; }
-        :root:not([data-theme="claro"]) .badge-amber   { color: #fbbf24; }
-        :root:not([data-theme="claro"]) .badge-red     { color: #f87171; }
-        :root:not([data-theme="claro"]) .badge-sky     { color: #38bdf8; }
+        :root:not([data-theme="claro"]):not([data-theme="grimorio"]):not([data-theme="brutalista"]):not([data-theme="eink"]) .badge-tiktok  { color: #22d3ee; }
+        :root:not([data-theme="claro"]):not([data-theme="grimorio"]):not([data-theme="brutalista"]):not([data-theme="eink"]) .badge-insta   { color: #f472b6; }
+        :root:not([data-theme="claro"]):not([data-theme="grimorio"]):not([data-theme="brutalista"]):not([data-theme="eink"]) .badge-yt      { color: #f87171; }
+        :root:not([data-theme="claro"]):not([data-theme="grimorio"]):not([data-theme="brutalista"]):not([data-theme="eink"]) .badge-x       { color: #38bdf8; }
+        :root:not([data-theme="claro"]):not([data-theme="grimorio"]):not([data-theme="brutalista"]):not([data-theme="eink"]) .badge-emerald { color: #34d399; }
+        :root:not([data-theme="claro"]):not([data-theme="grimorio"]):not([data-theme="brutalista"]):not([data-theme="eink"]) .badge-amber   { color: #fbbf24; }
+        :root:not([data-theme="claro"]):not([data-theme="grimorio"]):not([data-theme="brutalista"]):not([data-theme="eink"]) .badge-red     { color: #f87171; }
+        :root:not([data-theme="claro"]):not([data-theme="grimorio"]):not([data-theme="brutalista"]):not([data-theme="eink"]) .badge-sky     { color: #38bdf8; }
+        :root:not([data-theme="claro"]):not([data-theme="grimorio"]):not([data-theme="brutalista"]):not([data-theme="eink"]) .badge-ongoing { color: #d8b4fe; }
 
-        /* Quadro Infinito (3000x3000px) */
+        /* E-Ink: preto e branco puro sem cores */
+        [data-theme="eink"] .badge-tiktok,
+        [data-theme="eink"] .badge-insta,
+        [data-theme="eink"] .badge-yt,
+        [data-theme="eink"] .badge-x,
+        [data-theme="eink"] .badge-web,
+        [data-theme="eink"] .badge-emerald,
+        [data-theme="eink"] .badge-amber,
+        [data-theme="eink"] .badge-red,
+        [data-theme="eink"] .badge-sky,
+        [data-theme="eink"] .badge-ongoing,
+        [data-theme="eink"] .tag-pill {
+            background-color: #ffffff;
+            color: #000000;
+            border: 1.5px solid #000000;
+        }
+
+        /* Barra estilizada para obras em lançamento (sem teto fixo) */
+        .ongoing-track {
+            background: repeating-linear-gradient(
+                -45deg,
+                color-mix(in srgb, var(--accent) 55%, transparent) 0px,
+                color-mix(in srgb, var(--accent) 55%, transparent) 8px,
+                color-mix(in srgb, var(--accent) 18%, transparent) 8px,
+                color-mix(in srgb, var(--accent) 18%, transparent) 16px
+            );
+        }
+
+        /* Padrões de Fundo do Quadro Infinito (por tema) */
         .bg-dots {
             background-color: var(--bg-base);
             background-image: radial-gradient(circle, var(--dot-color) 1.35px, transparent 1.35px);
             background-size: 24px 24px;
+        }
+
+        [data-theme="crt"] .bg-dots {
+            background-image:
+                linear-gradient(to right, rgba(0, 255, 102, 0.08) 1px, transparent 1px),
+                linear-gradient(to bottom, rgba(0, 255, 102, 0.08) 1px, transparent 1px);
+            background-size: 28px 28px;
+        }
+
+        [data-theme="ambar"] .bg-dots {
+            background-image:
+                linear-gradient(to right, rgba(245, 158, 11, 0.07) 1px, transparent 1px),
+                linear-gradient(to bottom, rgba(245, 158, 11, 0.07) 1px, transparent 1px);
+            background-size: 32px 32px;
+        }
+
+        [data-theme="grimorio"] .bg-dots {
+            background-image:
+                linear-gradient(to bottom, rgba(139, 107, 74, 0.14) 1px, transparent 1px),
+                radial-gradient(circle, rgba(110, 88, 70, 0.1) 1px, transparent 1px);
+            background-size: 100% 28px, 28px 28px;
+        }
+
+        [data-theme="synthwave"] .bg-dots {
+            background-image:
+                linear-gradient(to right, rgba(255, 42, 133, 0.16) 1px, transparent 1px),
+                linear-gradient(to bottom, rgba(0, 240, 255, 0.14) 1px, transparent 1px);
+            background-size: 36px 36px;
+        }
+
+        [data-theme="blueprint"] .bg-dots {
+            background-image:
+                linear-gradient(to right, rgba(56, 189, 248, 0.22) 1px, transparent 1px),
+                linear-gradient(to bottom, rgba(56, 189, 248, 0.22) 1px, transparent 1px),
+                linear-gradient(to right, rgba(56, 189, 248, 0.08) 1px, transparent 1px),
+                linear-gradient(to bottom, rgba(56, 189, 248, 0.08) 1px, transparent 1px);
+            background-size: 100px 100px, 100px 100px, 20px 20px, 20px 20px;
+        }
+
+        [data-theme="eink"] .bg-dots {
+            background-image: radial-gradient(circle, rgba(0, 0, 0, 0.22) 1px, transparent 1px);
+            background-size: 20px 20px;
         }
 
         #canvas-container {
@@ -340,11 +751,13 @@
 
         .kanban-card {
             background-color: var(--bg-panel);
+            border: var(--border-width) var(--border-style) var(--border-color);
+            border-radius: var(--radius-card) !important;
             position: absolute;
             width: 300px;
             height: fit-content;
             z-index: 10;
-            box-shadow: var(--shadow-soft);
+            box-shadow: var(--card-shadow);
             transition: border-color 0.2s ease, box-shadow 0.2s ease, opacity 0.2s ease;
         }
         .kanban-card:hover {
@@ -384,6 +797,9 @@
     </style>
 </head>
 <body class="flex flex-col md:flex-row h-[100dvh] w-screen overflow-hidden text-sm">
+
+    <!-- Overlay de Scanlines exclusivo do tema Terminal CRT -->
+    <div id="crtScanlinesOverlay" aria-hidden="true"></div>
 
     <!-- =========================================================
          BARRA LATERAL ESQUERDA (DESKTOP)
@@ -753,9 +1169,10 @@
                         <div class="flex items-center gap-2">
                             <select id="readingTypeFilter" onchange="app.renderReadings()" class="input-themed rounded-lg px-2.5 py-1.5 text-xs sm:text-sm">
                                 <option value="all">Todos os tipos</option>
-                                <option value="Livro">Livros</option>
-                                <option value="Mangá">Mangás</option>
-                                <option value="HQ">HQs / Quadrinhos</option>
+                                <option value="manga">Mangás</option>
+                                <option value="livro">Livros</option>
+                                <option value="hq">HQs / Quadrinhos</option>
+                                <option value="webtoon">Webtoons</option>
                             </select>
                             <input type="text" id="readingSearchInput" placeholder="Buscar obra..." oninput="app.renderReadings()" class="flex-1 sm:w-48 input-themed rounded-lg px-3 py-1.5 text-xs sm:text-sm">
                         </div>
@@ -889,7 +1306,7 @@
          MODAL: NOVO / EDITAR PROJETO
          ========================================================= -->
     <div id="projectModal" class="hidden fixed inset-0 z-50 theme-overlay backdrop-blur-sm flex items-center justify-center p-4" onclick="if(event.target === this) app.closeModal('projectModal')">
-        <div class="theme-panel border theme-border rounded-2xl p-5 max-w-md w-full theme-modal-shadow animate-slide-up">
+        <div class="theme-panel border theme-border rounded-2xl p-5 max-w-md w-full theme-modal-shadow animate-slide-up max-h-[90dvh] overflow-y-auto">
             <h3 id="projectModalTitle" class="text-base font-bold theme-text mb-4">Novo Projeto</h3>
             <form onsubmit="app.saveProject(event)" class="space-y-3">
                 <input type="hidden" id="projEditId">
@@ -906,6 +1323,20 @@
                         <option value="Concluído">Concluído</option>
                     </select>
                 </div>
+                <!-- Seletor de Cor do Projeto (10 cores rápidas + seletor livre) -->
+                <div>
+                    <label class="block text-xs theme-muted mb-1.5">Cor do Projeto</label>
+                    <div class="theme-sub-card p-3 space-y-2.5">
+                        <div id="projectColorPalette" class="flex flex-wrap items-center gap-2"></div>
+                        <div class="flex items-center justify-between gap-2 pt-2 border-t theme-border">
+                            <span class="text-[11px] theme-muted">Cor personalizada:</span>
+                            <div class="flex items-center gap-2">
+                                <span id="projColorHexLabel" class="mono text-xs font-semibold theme-text">#7852ee</span>
+                                <input type="color" id="projColorInput" value="#7852ee" oninput="app.selectModalProjectColor(this.value)" class="w-8 h-7 rounded cursor-pointer bg-transparent border-0 p-0">
+                            </div>
+                        </div>
+                    </div>
+                </div>
                 <div>
                     <label class="block text-xs theme-muted mb-1">Descrição / Visão</label>
                     <textarea id="projDescInput" rows="3" placeholder="Objetivo principal do projeto..." class="w-full input-themed rounded-lg p-2.5 text-sm resize-y"></textarea>
@@ -919,57 +1350,86 @@
     </div>
 
     <!-- =========================================================
+         MODAL RÁPIDO: TROCAR COR DO PROJETO
+         ========================================================= -->
+    <div id="projectColorModal" class="hidden fixed inset-0 z-50 theme-overlay backdrop-blur-sm flex items-center justify-center p-4" onclick="if(event.target === this) app.closeModal('projectColorModal')">
+        <div class="theme-panel border theme-border rounded-2xl p-5 max-w-xs w-full theme-modal-shadow animate-slide-up space-y-4">
+            <div class="flex items-center justify-between">
+                <h3 class="text-sm font-bold theme-text">Cor do Projeto</h3>
+                <button onclick="app.closeModal('projectColorModal')" class="btn-ghost p-1 rounded-lg">✕</button>
+            </div>
+            <div id="quickProjectColorGrid" class="grid grid-cols-5 gap-2.5 justify-items-center"></div>
+            <div class="flex items-center justify-between gap-2 pt-3 border-t theme-border">
+                <span class="text-xs theme-muted">Personalizada:</span>
+                <div class="flex items-center gap-2">
+                    <input type="color" id="quickProjColorPicker" onchange="app.applyQuickProjectColor(this.value)" class="w-9 h-8 rounded cursor-pointer bg-transparent border-0 p-0">
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- =========================================================
          MODAL: NOVA / EDITAR LEITURA
          ========================================================= -->
     <div id="readingModal" class="hidden fixed inset-0 z-50 theme-overlay backdrop-blur-sm flex items-center justify-center p-4" onclick="if(event.target === this) app.closeModal('readingModal')">
-        <div class="theme-panel border theme-border rounded-2xl p-5 max-w-md w-full theme-modal-shadow animate-slide-up">
+        <div class="theme-panel border theme-border rounded-2xl p-5 max-w-md w-full theme-modal-shadow animate-slide-up max-h-[90dvh] overflow-y-auto">
             <h3 id="readingModalTitle" class="text-base font-bold theme-text mb-4">Nova Leitura</h3>
             <form onsubmit="app.saveReading(event)" class="space-y-3">
                 <input type="hidden" id="readEditId">
                 <div>
                     <label class="block text-xs theme-muted mb-1">Título da Obra *</label>
-                    <input type="text" id="readTitleInput" required placeholder="Ex: Berserk, Duna, Sandman..." class="w-full input-themed rounded-lg p-2.5 text-sm">
+                    <input type="text" id="readTitleInput" required placeholder="Ex: One Piece, Berserk, Duna, Solo Leveling..." class="w-full input-themed rounded-lg p-2.5 text-sm">
                 </div>
                 <div class="grid grid-cols-2 gap-2.5">
                     <div>
                         <label class="block text-xs theme-muted mb-1">Tipo</label>
-                        <select id="readTypeInput" class="w-full input-themed rounded-lg p-2.5 text-sm">
-                            <option value="Livro">Livro</option>
-                            <option value="Mangá">Mangá</option>
-                            <option value="HQ">HQ</option>
+                        <select id="readTypeInput" onchange="app.onReadingTypeChange()" class="w-full input-themed rounded-lg p-2.5 text-sm">
+                            <option value="manga">Mangá</option>
+                            <option value="livro">Livro</option>
+                            <option value="hq">HQ / Quadrinho</option>
+                            <option value="webtoon">Webtoon</option>
                         </select>
                     </div>
                     <div>
                         <label class="block text-xs theme-muted mb-1">Status</label>
                         <select id="readStatusInput" class="w-full input-themed rounded-lg p-2.5 text-sm">
-                            <option value="Lendo">Lendo</option>
-                            <option value="Quero Ler">Quero Ler</option>
-                            <option value="Pausado">Pausado</option>
-                            <option value="Concluído">Concluído</option>
+                            <option value="reading">Lendo</option>
+                            <option value="ongoing">Em lançamento</option>
+                            <option value="paused">Pausado</option>
+                            <option value="completed">Concluído</option>
                         </select>
                     </div>
                 </div>
+
+                <!-- Toggle: Ainda em lançamento (soltando capítulos) -->
+                <label class="theme-sub-card p-3 flex items-center justify-between gap-3 cursor-pointer">
+                    <div>
+                        <div class="text-xs font-semibold theme-text">Ainda em lançamento (soltando capítulos)</div>
+                        <div class="text-[11px] theme-muted">Libera contagem sem limite fixo e acompanhamento de capítulos novos</div>
+                    </div>
+                    <input type="checkbox" id="readOngoingInput" onchange="app.onReadingOngoingToggle()" class="w-4 h-4 checkbox-accent rounded shrink-0">
+                </label>
+
                 <div class="grid grid-cols-3 gap-2">
                     <div>
                         <label class="block text-xs theme-muted mb-1">Unidade</label>
-                        <select id="readUnitInput" class="w-full input-themed rounded-lg p-2.5 text-xs">
-                            <option value="Pág">Páginas</option>
-                            <option value="Cap">Capítulos</option>
-                            <option value="Ed">Edições</option>
+                        <select id="readUnitInput" onchange="app.onReadingOngoingToggle()" class="w-full input-themed rounded-lg p-2.5 text-xs">
+                            <option value="cap">Capítulos</option>
+                            <option value="pag">Páginas</option>
                         </select>
                     </div>
                     <div>
-                        <label class="block text-xs theme-muted mb-1">Atual</label>
+                        <label class="block text-xs theme-muted mb-1">Atual lido</label>
                         <input type="number" id="readCurrentInput" min="0" value="0" class="w-full input-themed rounded-lg p-2.5 text-sm mono">
                     </div>
                     <div>
-                        <label class="block text-xs theme-muted mb-1">Total</label>
-                        <input type="number" id="readTotalInput" min="1" value="100" required class="w-full input-themed rounded-lg p-2.5 text-sm mono">
+                        <label id="readTotalLabel" class="block text-xs theme-muted mb-1 truncate">Total</label>
+                        <input type="number" id="readTotalInput" min="0" value="" placeholder="Opcional" class="w-full input-themed rounded-lg p-2.5 text-sm mono">
                     </div>
                 </div>
                 <div>
                     <label class="block text-xs theme-muted mb-1">Autor / Nota (opcional)</label>
-                    <input type="text" id="readNoteInput" placeholder="Ex: Vol. 4 ou notas de leitura..." class="w-full input-themed rounded-lg p-2.5 text-sm">
+                    <input type="text" id="readNoteInput" placeholder="Ex: Sai todo domingo, Vol. 4..." class="w-full input-themed rounded-lg p-2.5 text-sm">
                 </div>
                 <div class="flex gap-2 pt-2">
                     <button type="button" onclick="app.closeModal('readingModal')" class="flex-1 btn-secondary py-2 rounded-xl text-xs font-semibold">Cancelar</button>
@@ -980,16 +1440,16 @@
     </div>
 
     <!-- =========================================================
-         MODAL: SELETOR DE 6 TEMAS DE APARÊNCIA
+         MODAL: SELETOR DE 12 TEMAS DE APARÊNCIA
          ========================================================= -->
     <div id="themeModal" class="hidden fixed inset-0 z-50 theme-overlay backdrop-blur-sm flex items-center justify-center p-4" onclick="if(event.target === this) app.closeModal('themeModal')">
-        <div class="theme-panel border theme-border rounded-2xl p-5 max-w-lg w-full theme-modal-shadow animate-slide-up max-h-[90dvh] overflow-y-auto">
+        <div class="theme-panel border theme-border rounded-2xl p-5 max-w-3xl w-full theme-modal-shadow animate-slide-up max-h-[90dvh] overflow-y-auto">
             <div class="flex items-center justify-between mb-1">
-                <h3 class="text-base font-bold theme-text">Aparência do Hub</h3>
+                <h3 class="text-base font-bold theme-text">Aparência do Hub (12 Temas)</h3>
                 <button onclick="app.closeModal('themeModal')" class="btn-ghost p-1 rounded-lg">✕</button>
             </div>
-            <p class="text-xs theme-muted mb-4">Escolha um dos 6 temas. A aparência sincroniza automaticamente com a nuvem.</p>
-            <div id="themeOptionsGrid" class="grid grid-cols-1 sm:grid-cols-2 gap-3"></div>
+            <p class="text-xs theme-muted mb-4">Cada tema transforma cores, tipografia, cantos, bordas, sombras e textura do quadro. Sincroniza automaticamente na nuvem.</p>
+            <div id="themeOptionsGrid" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3"></div>
         </div>
     </div>
 
@@ -1112,11 +1572,8 @@
          SCRIPT PRINCIPAL (FIREBASE v11 + ANTI-WIPE + 7 MÓDULOS)
          ========================================================= -->
     <script type="module">
-        import { initializeApp } from "https://www.gstatic.com/firebasejs/11.0.2/firebase-app.js";
-        import { getFirestore, doc, getDoc, setDoc, onSnapshot } from "https://www.gstatic.com/firebasejs/11.0.2/firebase-firestore.js";
-
         // =========================================================
-        // 1. CONFIGURAÇÃO FIXA DO FIREBASE (SEM AUTH / SEM LOGIN)
+        // 1. CONFIGURAÇÃO FIXA DO FIREBASE (CARREGAMENTO SEGURO)
         // =========================================================
         const firebaseConfig = {
             apiKey: "AIzaSyCyqqrqseASLA-9diZ8EgzIT0DKSFwL-s8",
@@ -1127,8 +1584,27 @@
             appId: "1:1079297489728:web:beee66110ad01c44a9d8a5"
         };
 
-        const fbApp = initializeApp(firebaseConfig);
-        const db = getFirestore(fbApp);
+        let db = null;
+        let fbSdk = null;
+
+        // Carrega o Firebase dinamicamente para que window.app sempre inicialize
+        // imediatamente, mesmo se o aparelho estiver offline ou com rede lenta.
+        async function ensureFirebase() {
+            if (db && fbSdk) return true;
+            try {
+                const [{ initializeApp }, firestoreMod] = await Promise.all([
+                    import("https://www.gstatic.com/firebasejs/11.0.2/firebase-app.js"),
+                    import("https://www.gstatic.com/firebasejs/11.0.2/firebase-firestore.js")
+                ]);
+                const fbApp = initializeApp(firebaseConfig);
+                db = firestoreMod.getFirestore(fbApp);
+                fbSdk = firestoreMod;
+                return true;
+            } catch (err) {
+                console.warn("Firebase SDK indisponível no momento:", err);
+                return false;
+            }
+        }
 
         // =========================================================
         // 2. CONSTANTES DE ARMAZENAMENTO, TEMAS E MÓDULOS
@@ -1140,13 +1616,32 @@
         const DEFAULT_SYNC_KEY = "meu-hub-2026";
         const MAX_SNAPSHOTS = 8;
 
+        const PROJECT_COLORS = [
+            { name: "Roxo",      hex: "#7852ee" },
+            { name: "Carmesim",  hex: "#e11d48" },
+            { name: "Esmeralda", hex: "#10b981" },
+            { name: "Âmbar",     hex: "#f59e0b" },
+            { name: "Ciano",     hex: "#06b6d4" },
+            { name: "Azul",      hex: "#3b82f6" },
+            { name: "Rosa",      hex: "#ec4899" },
+            { name: "Laranja",   hex: "#f97316" },
+            { name: "Lima",      hex: "#84cc16" },
+            { name: "Índigo",    hex: "#6366f1" }
+        ];
+
         const THEMES = [
-            { id: "obsidian", name: "Obsidian", desc: "Escuro padrão roxo", bg: "#1e1e1e", panel: "#252525", accent: "#7852ee", meta: "#1e1e1e" },
-            { id: "vinho",    name: "Vinho Noturno", desc: "Bordô profundo elegante", bg: "#140f12", panel: "#1d1519", accent: "#b91c3c", meta: "#140f12" },
-            { id: "crt",      name: "Terminal CRT", desc: "Fósforo verde retrô", bg: "#0b110d", panel: "#111a14", accent: "#22c55e", meta: "#0b110d" },
-            { id: "nord",     name: "Abismo Nord", desc: "Azul ártico suave", bg: "#1b212c", panel: "#232a37", accent: "#5e81ac", meta: "#1b212c" },
-            { id: "ambar",    name: "Âmbar Industrial", desc: "Grafite quente e ouro", bg: "#1a1815", panel: "#24211c", accent: "#d97706", meta: "#1a1815" },
-            { id: "claro",    name: "Papel Claro", desc: "Modo claro limpo", bg: "#f4f4f5", panel: "#ffffff", accent: "#6d28d9", meta: "#f4f4f5" }
+            { id: "obsidian",   name: "Obsidian",             tag: "Clássico",    desc: "Escuro roxo pontilhado",          bg: "#1e1e1e", panel: "#252525", accent: "#7852ee", text: "#e6e7eb", border: "1px solid #34343a", radius: "10px", shadow: "0 3px 10px rgba(0,0,0,0.3)", font: "'Inter', sans-serif", meta: "#1e1e1e" },
+            { id: "vinho",      name: "Vinho Noturno",        tag: "Serifado",    desc: "Neo-noir carmesim e ouro Cinzel", bg: "#11080c", panel: "#1b0e14", accent: "#d11a48", text: "#e2b46d", border: "1px solid #6e2a45", radius: "6px",  shadow: "0 3px 12px rgba(209,26,72,0.28)", font: "'Cinzel', serif", meta: "#11080c" },
+            { id: "crt",        name: "Terminal CRT",         tag: "Scanlines",   desc: "Fósforo verde mono + scanlines",  bg: "#050b07", panel: "#09140d", accent: "#00ff66", text: "#00ff66", border: "1px solid #00cc52", radius: "0px",  shadow: "0 0 10px rgba(0,255,102,0.3)", font: "'VT323', monospace", meta: "#050b07" },
+            { id: "nord",       name: "Abismo Nord",          tag: "Suave",       desc: "Azul-ardósia com cantos 16px",    bg: "#2e3440", panel: "#3b4252", accent: "#88c0d0", text: "#eceff4", border: "1px solid rgba(136,192,208,0.3)", radius: "14px", shadow: "0 4px 12px rgba(0,0,0,0.25)", font: "'Inter', sans-serif", meta: "#2e3440" },
+            { id: "ambar",      name: "Âmbar Industrial",     tag: "Industrial",  desc: "Sci-fi aço, âmbar e bordas 2px",  bg: "#171511", panel: "#211e18", accent: "#f59e0b", text: "#fbbf24", border: "2px solid #6b5d47", radius: "2px",  shadow: "0 3px 10px rgba(0,0,0,0.45)", font: "'Space Grotesk', sans-serif", meta: "#171511" },
+            { id: "claro",      name: "Papel Claro",          tag: "Claro",       desc: "Superfícies brancas e índigo",    bg: "#f5f6f8", panel: "#ffffff", accent: "#5b46e8", text: "#18181b", border: "1px solid #dce0e8", radius: "10px", shadow: "0 3px 10px rgba(0,0,0,0.08)", font: "'Inter', sans-serif", meta: "#f5f6f8" },
+            { id: "grimorio",   name: "Grimório / Pergaminho",tag: "Pergaminho",  desc: "Caderno sépia, lacre e Crimson",  bg: "#f2e8d5", panel: "#fbf5e9", accent: "#9e2a2b", text: "#2c1e16", border: "3px double #cbb894", radius: "4px", shadow: "0 3px 8px rgba(44,30,22,0.14)", font: "'Crimson Pro', serif", meta: "#f2e8d5" },
+            { id: "synthwave",  name: "Cyber Synthwave",      tag: "Neon Grid",   desc: "Noite neon magenta & ciano",      bg: "#0d051a", panel: "#160a2b", accent: "#ff2a85", text: "#00f0ff", border: "1px solid #ff2a85", radius: "8px",  shadow: "0 0 12px rgba(255,42,133,0.4)", font: "'Space Grotesk', sans-serif", meta: "#0d051a" },
+            { id: "blueprint",  name: "Blueprint CAD",        tag: "Cantos Retos",desc: "Planta azul prussiano milimetr.", bg: "#0a1d37", panel: "#0f294d", accent: "#38bdf8", text: "#e6f6ff", border: "1px solid #38bdf8", radius: "2px",  shadow: "0 3px 10px rgba(2,12,27,0.45)", font: "'JetBrains Mono', monospace", meta: "#0a1d37" },
+            { id: "matcha",     name: "Bosque Matcha",        tag: "Orgânico",    desc: "Floresta calma e cantos 18px",    bg: "#101a14", panel: "#17251d", accent: "#74c69d", text: "#e8f3e8", border: "1px solid #467359", radius: "16px", shadow: "0 4px 14px rgba(0,0,0,0.3)", font: "'Inter', sans-serif", meta: "#101a14" },
+            { id: "brutalista", name: "Neo-Brutalismo",       tag: "Brutalista",  desc: "Bordas pretas e sombra dura",     bg: "#fffdf2", panel: "#ffffff", accent: "#ff521b", text: "#111111", border: "2px solid #111111", radius: "2px",  shadow: "4px 4px 0px #111111", font: "'Space Grotesk', sans-serif", meta: "#fffdf2" },
+            { id: "eink",       name: "Mangá E-Ink",          tag: "E-Ink",       desc: "Preto e branco puro estilo HQ",   bg: "#ffffff", panel: "#ffffff", accent: "#000000", text: "#000000", border: "1.5px solid #000000", radius: "2px", shadow: "none", font: "'Crimson Pro', serif", meta: "#ffffff" }
         ];
 
         const MODULES = [
@@ -1250,14 +1745,14 @@
                 ],
                 projects: [
                     {
-                        id: "proj_arq", name: "O Arquivista", status: "Ativo", desc: "Sistema de cápsulas, cartas e arquivo pessoal.",
+                        id: "proj_arq", name: "O Arquivista", status: "Ativo", color: "#7852ee", desc: "Sistema de cápsulas, cartas e arquivo pessoal.",
                         features: [
                             { id: "pf1", title: "Layout das cartas e tags", priority: "Alta", done: false },
                             { id: "pf2", title: "Filtro rápido por categoria", priority: "Média", done: true }
                         ]
                     },
                     {
-                        id: "proj_comp", name: "Kanban Companion", status: "Ativo", desc: "Hub digital blindado complementar aos post-its físicos.",
+                        id: "proj_comp", name: "Kanban Companion", status: "Ativo", color: "#10b981", desc: "Hub digital blindado complementar aos post-its físicos.",
                         features: [
                             { id: "pf3", title: "Sincronização blindada no Firebase", priority: "Alta", done: true },
                             { id: "pf4", title: "Testar instalação PWA no celular", priority: "Média", done: false }
@@ -1268,8 +1763,52 @@
                     { id: "ev1", date: todayKey, time: "19:00", title: "Revisar post-its da semana", color: "#7852ee", note: "Sincronizar mural físico e digital" }
                 ],
                 readings: [
-                    { id: "rd1", title: "Exemplo: Duna", type: "Livro", status: "Lendo", unit: "Pág", current: 42, total: 680, note: "Livro 1" }
+                    { id: "rd1", title: "Exemplo: Duna", type: "livro", status: "reading", unit: "pag", ongoing: false, current: 42, total: 680, note: "Livro 1" },
+                    { id: "rd2", title: "Exemplo: Sakamoto Days", type: "manga", status: "ongoing", unit: "cap", ongoing: true, current: 185, total: 190, note: "Sai aos domingos" }
                 ]
+            };
+        }
+
+        // Normaliza tipo, unidade e status das leituras (compatível com backups antigos)
+        function normalizeReadingItem(r) {
+            const typeMap = { "Livro": "livro", "livro": "livro", "Mangá": "manga", "Manga": "manga", "manga": "manga", "HQ": "hq", "hq": "hq", "Webtoon": "webtoon", "webtoon": "webtoon" };
+            const unitMap = { "Pág": "pag", "Pag": "pag", "pag": "pag", "Cap": "cap", "cap": "cap", "Ed": "cap" };
+            const statusMap = { "Lendo": "reading", "Quero Ler": "reading", "reading": "reading", "Em lançamento": "ongoing", "ongoing": "ongoing", "Pausado": "paused", "paused": "paused", "Concluído": "completed", "completed": "completed" };
+
+            const type = typeMap[r.type] || "livro";
+            const unit = unitMap[r.unit] || (type === "livro" ? "pag" : "cap");
+            const ongoing = Boolean(r.ongoing || r.status === "ongoing" || r.status === "Em lançamento");
+            let status = statusMap[r.status] || (ongoing ? "ongoing" : "reading");
+            if (ongoing && status === "completed") status = "ongoing";
+
+            const current = Math.max(0, parseInt(r.current, 10) || 0);
+            let total = parseInt(r.total, 10);
+            if (!Number.isFinite(total) || total < 0) total = ongoing ? 0 : Math.max(1, current || 100);
+            if (!ongoing && total < 1) total = Math.max(1, current || 1);
+
+            return {
+                id: r.id || uid(),
+                title: r.title || "Sem título",
+                type,
+                unit,
+                ongoing,
+                status,
+                current,
+                total,
+                note: r.note || ""
+            };
+        }
+
+        // Normaliza projetos garantindo a cor (compatível com backups antigos)
+        function normalizeProjectItem(p, idx) {
+            const fallbackColor = PROJECT_COLORS[idx % PROJECT_COLORS.length].hex;
+            return {
+                id: p.id || uid(),
+                name: p.name || "Projeto",
+                status: p.status || "Ativo",
+                color: /^#[0-9a-f]{6}$/i.test(p.color || "") ? p.color : fallbackColor,
+                desc: p.desc || "",
+                features: Array.isArray(p.features) ? p.features : []
             };
         }
 
@@ -1285,9 +1824,9 @@
                 ideas: Array.isArray(raw.ideas) ? raw.ideas : [],
                 links: Array.isArray(raw.links) ? raw.links : [],
                 lists: Array.isArray(raw.lists) ? raw.lists : [],
-                projects: Array.isArray(raw.projects) ? raw.projects : [],
+                projects: Array.isArray(raw.projects) ? raw.projects.map(normalizeProjectItem) : [],
                 calendar: Array.isArray(raw.calendar) ? raw.calendar : [],
-                readings: Array.isArray(raw.readings) ? raw.readings : []
+                readings: Array.isArray(raw.readings) ? raw.readings.map(normalizeReadingItem) : []
             };
         }
 
@@ -1364,6 +1903,7 @@
         let selectedLinkPlatform = "all";
         let activeListId = state.lists[0]?.id || null;
         let activeProjectId = state.projects[0]?.id || null;
+        let quickColorProjectId = null;
         let activeReadingStatus = "all";
 
         const nowDate = new Date();
@@ -1660,7 +2200,7 @@
 
         // Gravação silenciosa do backup automático na nuvem (_backup)
         async function writeCloudAutoBackupIfNeeded(prevSnapshot, newTotal) {
-            if (!prevSnapshot) return;
+            if (!prevSnapshot || !db || !fbSdk) return;
             const prevTotal = countTotalItems(prevSnapshot);
             if (prevTotal === 0) return;
 
@@ -1669,10 +2209,10 @@
             if (elapsed < 120000 && !significantChange) return;
 
             try {
-                const backupRef = doc(db, "hubs", `${syncKey}_backup`);
+                const backupRef = fbSdk.doc(db, "hubs", `${syncKey}_backup`);
                 const backupPayload = buildSanitizedPayload(prevSnapshot);
                 backupPayload.backedUpAt = Date.now();
-                await setDoc(backupRef, backupPayload);
+                await fbSdk.setDoc(backupRef, backupPayload);
                 lastBackupWrittenAt = Date.now();
             } catch (err) {
                 // Falha silenciosa (ex: regra antiga sem _backup) não impede sync principal
@@ -1697,6 +2237,14 @@
             if (!navigator.onLine) {
                 syncStatusState = "offline";
                 lastSyncErrorMsg = "Offline — alterações aguardando conexão para enviar.";
+                updateSyncUI();
+                return;
+            }
+
+            const sdkOk = await ensureFirebase();
+            if (!sdkOk) {
+                syncStatusState = "offline";
+                lastSyncErrorMsg = "SDK do Firebase indisponível. Dados salvos localmente.";
                 updateSyncUI();
                 return;
             }
@@ -1727,9 +2275,9 @@
                 // Salva backup da versão anterior da nuvem antes de sobrescrever
                 await writeCloudAutoBackupIfNeeded(lastCloudSnapshot, newTotal);
 
-                const docRef = doc(db, "hubs", syncKey);
+                const docRef = fbSdk.doc(db, "hubs", syncKey);
                 const payload = buildSanitizedPayload(state);
-                await setDoc(docRef, payload);
+                await fbSdk.setDoc(docRef, payload);
 
                 // Sucesso
                 hasPendingWrite = false;
@@ -1778,7 +2326,7 @@
             if (pushDebounceTimer) clearTimeout(pushDebounceTimer);
             pushDebounceTimer = setTimeout(() => {
                 executeCloudPush(false);
-            }, 600);
+            }, 350);
         }
 
         // Inicia o listener em tempo real APÓS o handshake bem-sucedido
@@ -1787,8 +2335,9 @@
                 unsubscribeSnapshot();
                 unsubscribeSnapshot = null;
             }
+            if (!fbSdk) return;
 
-            unsubscribeSnapshot = onSnapshot(docRef, (snap) => {
+            unsubscribeSnapshot = fbSdk.onSnapshot(docRef, (snap) => {
                 // Filtro de eco (escrita local pendente)
                 if (snap.metadata.hasPendingWrites) return;
                 if (!snap.exists()) return;
@@ -1874,10 +2423,18 @@
                 return;
             }
 
-            const docRef = doc(db, "hubs", syncKey);
+            const sdkOk = await ensureFirebase();
+            if (!sdkOk) {
+                syncStatusState = "offline";
+                lastSyncErrorMsg = "Não foi possível carregar o Firebase SDK. Operando no modo local.";
+                updateSyncUI();
+                return;
+            }
+
+            const docRef = fbSdk.doc(db, "hubs", syncKey);
 
             try {
-                const snap = await getDoc(docRef);
+                const snap = await fbSdk.getDoc(docRef);
 
                 if (snap.exists()) {
                     const cloudRaw = snap.data();
@@ -1972,7 +2529,7 @@
         });
 
         // =========================================================
-        // 8. SISTEMA DE TEMAS (6 OPÇÕES + META THEME-COLOR)
+        // 8. SISTEMA DE TEMAS (12 OPÇÕES + META THEME-COLOR)
         // =========================================================
         function applyThemeVisual(themeId) {
             const found = THEMES.find(t => t.id === themeId) || THEMES[0];
@@ -1993,19 +2550,23 @@
             grid.innerHTML = THEMES.map(t => {
                 const active = state.theme === t.id;
                 return `
-                    <button onclick="app.selectTheme('${t.id}')" class="p-3 rounded-xl border text-left transition-all flex items-center gap-3 ${active ? "nav-item-active ring-1" : "theme-sub-card theme-hover"}" style="${active ? `border-color: ${t.accent};` : ""}">
-                        <div class="w-11 h-11 rounded-lg border shrink-0 flex flex-col overflow-hidden" style="background:${t.bg}; border-color:${t.accent};">
-                            <div class="h-3.5 w-full" style="background:${t.panel};"></div>
-                            <div class="flex-1 flex items-center justify-center">
-                                <span class="w-4 h-4 rounded-full" style="background:${t.accent};"></span>
+                    <button onclick="app.selectTheme('${t.id}')" class="p-3 border text-left transition-all flex flex-col gap-2.5 ${active ? "nav-item-active ring-2" : "theme-sub-card theme-hover"}" style="border-radius: var(--radius-card); ${active ? `border-color: ${t.accent};` : ""}">
+                        <!-- Miniatura visual real do tema -->
+                        <div class="w-full h-14 p-2 flex items-center justify-between gap-2 overflow-hidden relative" style="background:${t.bg}; border:${t.border}; border-radius:${t.radius}; box-shadow:${t.shadow};">
+                            <div class="flex-1 h-full px-2 py-1 flex flex-col justify-center" style="background:${t.panel}; border:${t.border}; border-radius:${t.radius};">
+                                <span style="font-family:${t.font}; color:${t.text}; font-size:13px; font-weight:700; line-height:1;">Aa Bb</span>
+                                <span class="mt-1 block h-1 w-10" style="background:${t.accent}; border-radius:${t.radius};"></span>
                             </div>
+                            <span class="w-5 h-5 shrink-0 flex items-center justify-center text-[10px] font-bold" style="background:${t.accent}; color:${t.id === "crt" || t.id === "ambar" || t.id === "nord" || t.id === "blueprint" || t.id === "matcha" ? "#0b0b0b" : "#ffffff"}; border-radius:${t.radius}; border:${t.id === "brutalista" ? "1.5px solid #111" : "none"};">
+                                ${active ? "✓" : ""}
+                            </span>
                         </div>
-                        <div class="min-w-0 flex-1">
-                            <div class="font-bold text-xs sm:text-sm theme-text flex items-center justify-between gap-1">
-                                <span class="truncate">${t.name}</span>
-                                ${active ? `<span class="text-[10px] px-1.5 py-0.5 rounded-full tag-pill">Ativo</span>` : ""}
+                        <div class="min-w-0 w-full">
+                            <div class="flex items-center justify-between gap-1.5">
+                                <span class="font-bold text-xs theme-text truncate">${esc(t.name)}</span>
+                                <span class="text-[10px] px-1.5 py-0.5 rounded-full tag-pill shrink-0">${esc(t.tag)}</span>
                             </div>
-                            <div class="text-[11px] theme-muted truncate mt-0.5">${t.desc}</div>
+                            <div class="text-[11px] theme-muted truncate mt-0.5">${esc(t.desc)}</div>
                         </div>
                     </button>
                 `;
@@ -2061,7 +2622,7 @@
             }).join("") + `
                 <button onclick="app.closeModal('mobileMoreSheet'); app.openThemeModal()" class="p-3.5 rounded-xl theme-sub-card theme-hover text-left flex items-center gap-2.5">
                     <svg class="w-5 h-5 theme-accent-text" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 21a4 4 0 01-4-4V5a2 2 0 012-2h4a2 2 0 012 2v12a4 4 0 01-4 4zm0 0h12a2 2 0 002-2v-4a2 2 0 00-2-2h-2.343M11 7.343l1.657-1.657a2 2 0 012.828 0l2.829 2.829a2 2 0 010 2.828l-8.486 8.485M7 17h.01"></path></svg>
-                    <span class="text-xs font-semibold theme-text">Temas (6)</span>
+                    <span class="text-xs font-semibold theme-text">Temas (12)</span>
                 </button>
                 <button onclick="app.closeModal('mobileMoreSheet'); app.openCloudModal()" class="col-span-2 p-3.5 rounded-xl theme-sub-card theme-hover text-left flex items-center justify-between">
                     <div class="flex items-center gap-2.5">
@@ -2125,38 +2686,42 @@
         }
 
         // =========================================================
-        // 10. MÓDULO 1: QUADRO KANBAN (CANVAS + LISTA + ZOOM + SVG)
+        // 10. MÓDULO 1: QUADRO KANBAN (QUADRO INFINITO + MODO LISTA)
         // =========================================================
         function setKanbanViewMode(mode) {
-            kanbanViewMode = mode;
-            const canvasW = document.getElementById("kanbanCanvasWrapper");
-            const listW = document.getElementById("kanbanListWrapper");
-            const btnC = document.getElementById("btnModeCanvas");
-            const btnL = document.getElementById("btnModeList");
+            kanbanViewMode = mode === "list" ? "list" : "canvas";
+            const btnCanvas = document.getElementById("btnModeCanvas");
+            const btnList = document.getElementById("btnModeList");
+            const canvasWrap = document.getElementById("kanbanCanvasWrapper");
+            const listWrap = document.getElementById("kanbanListWrapper");
 
-            if (mode === "canvas") {
-                canvasW.classList.remove("hidden");
-                listW.classList.add("hidden");
-                btnC.className = "px-2.5 py-1 rounded-md text-xs font-semibold btn-primary flex items-center gap-1.5";
-                btnL.className = "px-2.5 py-1 rounded-md text-xs font-medium btn-ghost flex items-center gap-1.5";
+            if (kanbanViewMode === "canvas") {
+                btnCanvas?.classList.add("btn-primary");
+                btnCanvas?.classList.remove("theme-muted");
+                btnList?.classList.remove("btn-primary");
+                btnList?.classList.add("theme-muted");
+                canvasWrap?.classList.remove("hidden");
+                listWrap?.classList.add("hidden");
             } else {
-                canvasW.classList.add("hidden");
-                listW.classList.remove("hidden");
-                btnL.className = "px-2.5 py-1 rounded-md text-xs font-semibold btn-primary flex items-center gap-1.5";
-                btnC.className = "px-2.5 py-1 rounded-md text-xs font-medium btn-ghost flex items-center gap-1.5";
+                btnList?.classList.add("btn-primary");
+                btnList?.classList.remove("theme-muted");
+                btnCanvas?.classList.remove("btn-primary");
+                btnCanvas?.classList.add("theme-muted");
+                canvasWrap?.classList.add("hidden");
+                listWrap?.classList.remove("hidden");
             }
             renderKanban();
         }
 
         function updateZoomUI() {
+            const display = document.getElementById("zoomLevelDisplay");
             const container = document.getElementById("canvas-container");
-            const disp = document.getElementById("zoomLevelDisplay");
+            if (display) display.textContent = `${Math.round(currentZoom * 100)}%`;
             if (container) container.style.transform = `scale(${currentZoom})`;
-            if (disp) disp.textContent = Math.round(currentZoom * 100) + "%";
         }
 
-        // Zoom via Ctrl + Scroll no Quadro Infinito
-        document.getElementById("kanbanCanvasWrapper").addEventListener("wheel", (e) => {
+        // Zoom pelo Ctrl + Scroll do mouse no quadro infinito
+        document.getElementById("kanbanCanvasWrapper")?.addEventListener("wheel", (e) => {
             if (e.ctrlKey || e.metaKey) {
                 e.preventDefault();
                 const delta = e.deltaY < 0 ? 0.1 : -0.1;
@@ -2165,197 +2730,28 @@
             }
         }, { passive: false });
 
-        function getKanbanFiltered() {
-            const term = (document.getElementById("kanbanSearch")?.value || "").trim().toLowerCase();
-            const statusF = document.getElementById("kanbanStatusFilter")?.value || "all";
-
-            return (state.kanban || []).filter(item => {
-                if (statusF !== "all" && (item.status || "todo") !== statusF) return false;
-                if (!term) return true;
-                return (
-                    (item.code || "").toLowerCase().includes(term) ||
-                    (item.title || "").toLowerCase().includes(term) ||
-                    (item.tag || "").toLowerCase().includes(term) ||
-                    (item.desc || "").toLowerCase().includes(term)
-                );
-            });
-        }
-
-        function getStatusStyle(status) {
-            if (status === "doing") return { borderColor: "var(--status-doing)", label: "Em Andamento", cls: "badge-amber" };
-            if (status === "done")  return { borderColor: "var(--status-done)",  label: "Concluído",    cls: "badge-emerald" };
-            return { borderColor: "var(--status-todo)", label: "A Fazer", cls: "badge-web" };
-        }
-
-        function renderKanban() {
-            const filtered = getKanbanFiltered();
-            const canvasGrid = document.getElementById("kanbanCanvasGrid");
-            const listGrid = document.getElementById("kanbanListGrid");
-            const emptyCanvas = document.getElementById("kanbanEmptyCanvas");
-
-            if (kanbanViewMode === "canvas") {
-                canvasGrid.innerHTML = "";
-                if (filtered.length === 0) {
-                    emptyCanvas.classList.remove("hidden");
-                    emptyCanvas.classList.add("flex");
-                    document.getElementById("linksLayer").innerHTML = "";
-                } else {
-                    emptyCanvas.classList.add("hidden");
-                    emptyCanvas.classList.remove("flex");
-                    filtered.forEach(entry => {
-                        canvasGrid.appendChild(createKanbanCanvasCard(entry));
-                    });
-                    requestAnimationFrame(drawKanbanLinks);
-                }
-            } else {
-                if (filtered.length === 0) {
-                    listGrid.innerHTML = `
-                        <div class="col-span-full theme-surface-card rounded-2xl p-8 text-center theme-muted">
-                            <p class="font-semibold theme-text">Nenhum post-it encontrado</p>
-                            <p class="text-xs mt-1">Tente limpar os filtros ou clique em "+ Post-it".</p>
-                        </div>
-                    `;
-                } else {
-                    const sorted = [...filtered].sort((a, b) => (b.timestamp || 0) - (a.timestamp || 0));
-                    listGrid.innerHTML = sorted.map(entry => {
-                        const st = getStatusStyle(entry.status || "todo");
-                        const descHtml = entry.desc ? esc(entry.desc).replace(/\n/g, "<br>") : `<span class="italic opacity-60">Sem detalhes adicionais.</span>`;
-                        const linksCount = (entry.links || []).length;
-                        return `
-                            <div class="theme-surface-card rounded-xl overflow-hidden flex flex-col border-l-4 ${entry.status === "done" ? "opacity-70" : ""}" style="border-left-color: ${st.borderColor};">
-                                <div class="theme-input-bg px-3.5 py-2.5 border-b theme-border flex items-center justify-between gap-2">
-                                    <span class="mono font-bold text-sm theme-accent-text">${esc(entry.code)}</span>
-                                    ${entry.tag ? `<span class="tag-pill text-[11px] font-semibold px-2 py-0.5 rounded-full truncate max-w-[140px]">${esc(entry.tag)}</span>` : ""}
-                                </div>
-                                <div class="p-3.5 flex-1 flex flex-col gap-2.5">
-                                    <h4 class="font-semibold text-sm theme-text leading-snug">${esc(entry.title)}</h4>
-                                    <div class="text-xs theme-muted max-h-28 overflow-y-auto leading-relaxed">${descHtml}</div>
-                                    ${linksCount > 0 ? `<div class="text-[11px] theme-accent-text mono">🔗 ${linksCount} ligação(ões)</div>` : ""}
-                                    <div class="mt-auto pt-2.5 border-t theme-border flex items-center justify-between gap-2">
-                                        <select onchange="app.changeKanbanStatus('${entry.id}', this.value)" class="input-themed rounded-lg px-2 py-1 text-xs">
-                                            <option value="todo" ${(entry.status || "todo") === "todo" ? "selected" : ""}>A Fazer</option>
-                                            <option value="doing" ${entry.status === "doing" ? "selected" : ""}>Em Andamento</option>
-                                            <option value="done" ${entry.status === "done" ? "selected" : ""}>Concluído</option>
-                                        </select>
-                                        <div class="flex items-center gap-1">
-                                            <button onclick="app.openLinkModal('${entry.id}')" class="btn-ghost p-1.5 rounded-lg" title="Ligar dependências">🔗</button>
-                                            <button onclick="app.openKanbanForm('${entry.id}')" class="btn-ghost p-1.5 rounded-lg" title="Editar">✏️</button>
-                                            <button onclick="app.deleteKanbanEntry('${entry.id}')" class="btn-danger-ghost p-1.5 rounded-lg" title="Excluir">🗑️</button>
-                                        </div>
-                                    </div>
-                                </div>
-                            </div>
-                        `;
-                    }).join("");
-                }
-            }
-        }
-
-        function createKanbanCanvasCard(entry) {
-            const st = getStatusStyle(entry.status || "todo");
-            const div = document.createElement("div");
-            div.id = `card-${entry.id}`;
-            div.className = `kanban-card rounded-xl border theme-border border-l-4 overflow-hidden ${entry.status === "done" ? "opacity-65 hover:opacity-100" : ""}`;
-            div.style.borderLeftColor = st.borderColor;
-            div.style.left = `${Number.isFinite(entry.x) ? entry.x : 80}px`;
-            div.style.top = `${Number.isFinite(entry.y) ? entry.y : 80}px`;
-
-            const descHtml = entry.desc ? esc(entry.desc).replace(/\n/g, "<br>") : `<span class="italic opacity-60">Sem detalhes adicionais.</span>`;
-
-            div.innerHTML = `
-                <div class="drag-handle theme-input-bg px-3 py-2.5 border-b theme-border flex items-center justify-between gap-2">
-                    <span class="mono text-sm font-bold theme-accent-text pointer-events-none">${esc(entry.code)}</span>
-                    ${entry.tag ? `<span class="tag-pill text-[11px] font-semibold px-2 py-0.5 rounded-full truncate max-w-[130px] pointer-events-none">${esc(entry.tag)}</span>` : ""}
-                </div>
-                <div class="p-3.5 flex flex-col gap-2.5">
-                    <h4 class="font-semibold text-sm theme-text leading-snug">${esc(entry.title)}</h4>
-                    <div class="text-xs theme-muted max-h-44 overflow-y-auto leading-relaxed">${descHtml}</div>
-                    <div class="pt-2.5 border-t theme-border flex items-center justify-between gap-2">
-                        <select onchange="app.changeKanbanStatus('${entry.id}', this.value)" class="input-themed rounded-lg px-2 py-1 text-xs">
-                            <option value="todo" ${(entry.status || "todo") === "todo" ? "selected" : ""}>A Fazer</option>
-                            <option value="doing" ${entry.status === "doing" ? "selected" : ""}>Em Andamento</option>
-                            <option value="done" ${entry.status === "done" ? "selected" : ""}>Concluído</option>
-                        </select>
-                        <div class="flex items-center gap-0.5">
-                            <button onclick="app.openLinkModal('${entry.id}')" class="btn-ghost p-1.5 rounded-lg text-xs" title="Ligar dependências">🔗</button>
-                            <button onclick="app.openKanbanForm('${entry.id}')" class="btn-ghost p-1.5 rounded-lg text-xs" title="Editar">✏️</button>
-                            <button onclick="app.deleteKanbanEntry('${entry.id}')" class="btn-danger-ghost p-1.5 rounded-lg text-xs" title="Excluir">🗑️</button>
-                        </div>
-                    </div>
-                </div>
-            `;
-
-            // Arrastar e Soltar via Pointer Events (Mouse + Toque com correção de currentZoom)
-            const handle = div.querySelector(".drag-handle");
-            let dragging = false;
-            let startX = 0, startY = 0, initL = 0, initT = 0, moved = false;
-
-            handle.addEventListener("pointerdown", (e) => {
-                if (e.button !== 0 && e.pointerType === "mouse") return;
-                dragging = true;
-                moved = false;
-                startX = e.clientX;
-                startY = e.clientY;
-                initL = parseFloat(div.style.left) || 0;
-                initT = parseFloat(div.style.top) || 0;
-                div.classList.add("is-dragging");
-                handle.setPointerCapture(e.pointerId);
-            });
-
-            handle.addEventListener("pointermove", (e) => {
-                if (!dragging) return;
-                const dx = (e.clientX - startX) / currentZoom;
-                const dy = (e.clientY - startY) / currentZoom;
-                if (Math.abs(dx) > 2 || Math.abs(dy) > 2) moved = true;
-                const nextL = Math.max(0, Math.min(2680, Math.round(initL + dx)));
-                const nextT = Math.max(0, Math.min(2760, Math.round(initT + dy)));
-                div.style.left = `${nextL}px`;
-                div.style.top = `${nextT}px`;
-                drawKanbanLinks();
-            });
-
-            const finishDrag = (e) => {
-                if (!dragging) return;
-                dragging = false;
-                div.classList.remove("is-dragging");
-                try { handle.releasePointerCapture(e.pointerId); } catch {}
-                if (moved) {
-                    const target = state.kanban.find(k => k.id === entry.id);
-                    if (target) {
-                        target.x = parseInt(div.style.left, 10) || 0;
-                        target.y = parseInt(div.style.top, 10) || 0;
-                        commitUserMutation("Mover Post-it");
-                    }
-                }
-            };
-
-            handle.addEventListener("pointerup", finishDrag);
-            handle.addEventListener("pointercancel", finishDrag);
-
-            return div;
-        }
-
         function drawKanbanLinks() {
             const svg = document.getElementById("linksLayer");
             if (!svg) return;
             svg.innerHTML = "";
 
             (state.kanban || []).forEach(entry => {
-                if (!Array.isArray(entry.links)) return;
-                const el1 = document.getElementById(`card-${entry.id}`);
+                if (!Array.isArray(entry.links) || entry.links.length === 0) return;
+                const el1 = document.getElementById(`kcard-${entry.id}`);
                 if (!el1) return;
 
+                const x1 = el1.offsetLeft + el1.offsetWidth / 2;
+                const y1 = el1.offsetTop + el1.offsetHeight / 2;
+
                 entry.links.forEach(targetId => {
-                    const el2 = document.getElementById(`card-${targetId}`);
+                    const el2 = document.getElementById(`kcard-${targetId}`);
                     if (!el2) return;
 
-                    const x1 = el1.offsetLeft + el1.offsetWidth / 2;
-                    const y1 = el1.offsetTop + el1.offsetHeight / 2;
                     const x2 = el2.offsetLeft + el2.offsetWidth / 2;
                     const y2 = el2.offsetTop + el2.offsetHeight / 2;
-                    const midX = (x1 + x2) / 2;
 
                     const path = document.createElementNS("http://www.w3.org/2000/svg", "path");
+                    const midX = (x1 + x2) / 2;
                     path.setAttribute("d", `M ${x1} ${y1} C ${midX} ${y1}, ${midX} ${y2}, ${x2} ${y2}`);
                     path.setAttribute("class", "svg-link-path");
                     svg.appendChild(path);
@@ -2363,58 +2759,233 @@
             });
         }
 
+        function attachPointerDrag(cardEl, entry) {
+            const handle = cardEl.querySelector(".drag-handle");
+            if (!handle) return;
+
+            let dragging = false;
+            let moved = false;
+            let startX = 0;
+            let startY = 0;
+            let initLeft = 0;
+            let initTop = 0;
+
+            handle.addEventListener("pointerdown", (e) => {
+                if (e.target.closest("button, select, input")) return;
+                dragging = true;
+                moved = false;
+                startX = e.clientX;
+                startY = e.clientY;
+                initLeft = parseFloat(cardEl.style.left) || 0;
+                initTop = parseFloat(cardEl.style.top) || 0;
+
+                cardEl.classList.add("is-dragging");
+                try { handle.setPointerCapture(e.pointerId); } catch {}
+                e.preventDefault();
+            });
+
+            handle.addEventListener("pointermove", (e) => {
+                if (!dragging) return;
+                const dx = (e.clientX - startX) / currentZoom;
+                const dy = (e.clientY - startY) / currentZoom;
+                if (Math.abs(dx) > 2 || Math.abs(dy) > 2) moved = true;
+
+                const maxLeft = Math.max(0, 3000 - cardEl.offsetWidth);
+                const maxTop = Math.max(0, 3000 - cardEl.offsetHeight);
+                const nextLeft = Math.max(0, Math.min(maxLeft, Math.round(initLeft + dx)));
+                const nextTop = Math.max(0, Math.min(maxTop, Math.round(initTop + dy)));
+
+                cardEl.style.left = `${nextLeft}px`;
+                cardEl.style.top = `${nextTop}px`;
+                drawKanbanLinks();
+            });
+
+            const finishDrag = (e) => {
+                if (!dragging) return;
+                dragging = false;
+                cardEl.classList.remove("is-dragging");
+                try { handle.releasePointerCapture(e.pointerId); } catch {}
+
+                if (moved) {
+                    entry.x = parseInt(cardEl.style.left, 10) || 0;
+                    entry.y = parseInt(cardEl.style.top, 10) || 0;
+                    commitUserMutation("Mover Post-it");
+                }
+            };
+
+            handle.addEventListener("pointerup", finishDrag);
+            handle.addEventListener("pointercancel", finishDrag);
+        }
+
+        function getKanbanStatusBorderColor(status) {
+            if (status === "doing") return "var(--status-doing)";
+            if (status === "done") return "var(--status-done)";
+            return "var(--status-todo)";
+        }
+
+        function buildKanbanCardInnerHtml(entry, showDragHint = true) {
+            const status = entry.status || "todo";
+            const formattedDesc = entry.desc
+                ? esc(entry.desc).replace(/\n/g, "<br>")
+                : `<span class="italic opacity-60">Sem detalhes adicionais.</span>`;
+            const linksCount = Array.isArray(entry.links) ? entry.links.length : 0;
+
+            return `
+                <div class="${showDragHint ? "drag-handle" : ""} theme-panel-alt px-3 py-2.5 border-b theme-border flex items-center justify-between gap-2" style="border-top-left-radius: var(--radius-card); border-top-right-radius: var(--radius-card);">
+                    <div class="flex items-center gap-2 min-w-0">
+                        <span class="mono text-sm font-bold theme-accent-text theme-sub-card px-2 py-0.5 shrink-0">${esc(entry.code)}</span>
+                        ${linksCount > 0 ? `<span class="text-[10px] mono theme-muted" title="${linksCount} ligação(ões)">🔗${linksCount}</span>` : ""}
+                    </div>
+                    ${entry.tag ? `<span class="tag-pill text-[11px] font-semibold px-2 py-0.5 rounded-full truncate max-w-[130px]">${esc(entry.tag)}</span>` : ""}
+                </div>
+                <div class="p-3.5 flex flex-col gap-2.5">
+                    <h4 class="font-semibold text-sm sm:text-base theme-text leading-snug break-words">${esc(entry.title)}</h4>
+                    <div class="text-xs sm:text-sm theme-muted max-h-44 overflow-y-auto leading-relaxed break-words">${formattedDesc}</div>
+                    <div class="pt-2.5 border-t theme-border flex items-center justify-between gap-2">
+                        <select onchange="app.changeKanbanStatus('${entry.id}', this.value)" class="input-themed px-2 py-1 text-xs cursor-pointer">
+                            <option value="todo" ${status === "todo" ? "selected" : ""}>A Fazer</option>
+                            <option value="doing" ${status === "doing" ? "selected" : ""}>Em Andamento</option>
+                            <option value="done" ${status === "done" ? "selected" : ""}>Concluído</option>
+                        </select>
+                        <div class="flex items-center gap-0.5">
+                            <button onclick="app.openLinkModal('${entry.id}')" class="btn-ghost p-1.5 text-xs" title="Ligar dependências">🔗</button>
+                            <button onclick="app.openKanbanForm('${entry.id}')" class="btn-ghost p-1.5 text-xs" title="Editar">✏️</button>
+                            <button onclick="app.deleteKanbanEntry('${entry.id}')" class="btn-danger-ghost p-1.5 text-xs" title="Excluir">🗑️</button>
+                        </div>
+                    </div>
+                </div>
+            `;
+        }
+
+        function renderKanban() {
+            const term = (document.getElementById("kanbanSearch")?.value || "").trim().toLowerCase();
+            const statusFilter = document.getElementById("kanbanStatusFilter")?.value || "all";
+
+            const filtered = (state.kanban || []).filter(e => {
+                if (statusFilter !== "all" && (e.status || "todo") !== statusFilter) return false;
+                if (!term) return true;
+                return (
+                    (e.code || "").toLowerCase().includes(term) ||
+                    (e.title || "").toLowerCase().includes(term) ||
+                    (e.tag || "").toLowerCase().includes(term) ||
+                    (e.desc || "").toLowerCase().includes(term)
+                );
+            });
+
+            if (kanbanViewMode === "canvas") {
+                const grid = document.getElementById("kanbanCanvasGrid");
+                const empty = document.getElementById("kanbanEmptyCanvas");
+                const svg = document.getElementById("linksLayer");
+                if (!grid) return;
+
+                grid.innerHTML = "";
+                if (filtered.length === 0) {
+                    empty?.classList.remove("hidden");
+                    empty?.classList.add("flex");
+                    if (svg) svg.innerHTML = "";
+                    return;
+                }
+
+                empty?.classList.add("hidden");
+                empty?.classList.remove("flex");
+
+                filtered.forEach((entry, idx) => {
+                    const card = document.createElement("div");
+                    card.id = `kcard-${entry.id}`;
+                    const isDone = entry.status === "done";
+                    card.className = `kanban-card flex flex-col border-l-4 ${isDone ? "opacity-60 hover:opacity-100" : ""}`;
+                    card.style.borderLeftColor = getKanbanStatusBorderColor(entry.status || "todo");
+                    card.style.left = `${Number.isFinite(entry.x) ? entry.x : 60 + (idx % 4) * 340}px`;
+                    card.style.top = `${Number.isFinite(entry.y) ? entry.y : 60 + Math.floor(idx / 4) * 260}px`;
+                    card.innerHTML = buildKanbanCardInnerHtml(entry, true);
+                    attachPointerDrag(card, entry);
+                    grid.appendChild(card);
+                });
+
+                setTimeout(drawKanbanLinks, 20);
+            } else {
+                const listGrid = document.getElementById("kanbanListGrid");
+                if (!listGrid) return;
+
+                if (filtered.length === 0) {
+                    listGrid.innerHTML = `<div class="col-span-full theme-surface-card p-8 text-center theme-muted">Nenhum post-it encontrado. Clique em "+ Post-it" no topo para criar.</div>`;
+                    return;
+                }
+
+                const statusRank = { doing: 0, todo: 1, done: 2 };
+                const sorted = [...filtered].sort((a, b) =>
+                    ((statusRank[a.status || "todo"] ?? 1) - (statusRank[b.status || "todo"] ?? 1)) ||
+                    ((b.timestamp || 0) - (a.timestamp || 0))
+                );
+
+                listGrid.innerHTML = sorted.map(entry => {
+                    const isDone = entry.status === "done";
+                    return `
+                        <div class="theme-surface-card flex flex-col border-l-4 ${isDone ? "opacity-65" : ""}" style="border-left-color: ${getKanbanStatusBorderColor(entry.status || "todo")};">
+                            ${buildKanbanCardInnerHtml(entry, false)}
+                        </div>
+                    `;
+                }).join("");
+            }
+        }
+
         // =========================================================
         // 11. MÓDULO 2: IDEIAS ALEATÓRIAS
         // =========================================================
         function renderIdeas() {
+            const ideas = state.ideas || [];
+            const allTags = Array.from(new Set(ideas.flatMap(i => i.tags || []))).sort((a, b) => a.localeCompare(b));
+            if (selectedIdeaTag !== "all" && !allTags.includes(selectedIdeaTag)) {
+                selectedIdeaTag = "all";
+            }
+
+            const tagContainer = document.getElementById("ideaTagFilters");
+            if (tagContainer) {
+                tagContainer.innerHTML = [`<button onclick="app.setIdeaTagFilter('all')" class="px-2.5 py-1.5 text-xs font-semibold shrink-0 ${selectedIdeaTag === "all" ? "btn-primary" : "btn-secondary"}">Todas</button>`]
+                    .concat(allTags.map(t => `<button onclick="app.setIdeaTagFilter('${esc(t)}')" class="px-2.5 py-1.5 text-xs font-semibold shrink-0 ${selectedIdeaTag === t ? "btn-primary" : "btn-secondary"}">#${esc(t)}</button>`))
+                    .join("");
+            }
+
             const term = (document.getElementById("ideaSearchInput")?.value || "").trim().toLowerCase();
-            const allTags = new Set();
-            (state.ideas || []).forEach(i => (i.tags || []).forEach(t => allTags.add(t)));
-
-            const filtersEl = document.getElementById("ideaTagFilters");
-            const tagsArr = ["all", ...Array.from(allTags)];
-            filtersEl.innerHTML = tagsArr.map(t => {
-                const active = selectedIdeaTag === t;
-                return `<button onclick="app.setIdeaTagFilter('${esc(t)}')" class="px-2.5 py-1 rounded-full text-xs font-medium shrink-0 ${active ? "btn-primary" : "btn-secondary"}">${t === "all" ? "Todas" : "#" + esc(t)}</button>`;
-            }).join("");
-
-            const filtered = (state.ideas || []).filter(i => {
-                if (selectedIdeaTag !== "all" && !(i.tags || []).includes(selectedIdeaTag)) return false;
-                if (!term) return true;
-                return (
-                    (i.title || "").toLowerCase().includes(term) ||
-                    (i.text || "").toLowerCase().includes(term) ||
-                    (i.tags || []).some(t => t.toLowerCase().includes(term))
-                );
-            }).sort((a, b) => (Number(!!b.pinned) - Number(!!a.pinned)) || ((b.createdAt || 0) - (a.createdAt || 0)));
+            const filtered = ideas
+                .filter(i => {
+                    if (selectedIdeaTag !== "all" && !(i.tags || []).includes(selectedIdeaTag)) return false;
+                    if (!term) return true;
+                    return (
+                        (i.title || "").toLowerCase().includes(term) ||
+                        (i.text || "").toLowerCase().includes(term) ||
+                        (i.tags || []).some(t => t.toLowerCase().includes(term))
+                    );
+                })
+                .sort((a, b) => (Number(!!b.pinned) - Number(!!a.pinned)) || ((b.createdAt || 0) - (a.createdAt || 0)));
 
             const grid = document.getElementById("ideasGrid");
+            if (!grid) return;
+
             if (filtered.length === 0) {
-                grid.innerHTML = `<div class="col-span-full theme-surface-card rounded-xl p-8 text-center theme-muted">Nenhuma ideia encontrada. Capture uma acima!</div>`;
+                grid.innerHTML = `<div class="col-span-full theme-surface-card p-8 text-center theme-muted">Nenhuma ideia encontrada. Anote algo no campo acima!</div>`;
                 return;
             }
 
-            grid.innerHTML = filtered.map(idea => `
-                <div class="theme-surface-card rounded-xl p-4 flex flex-col gap-2.5 ${idea.pinned ? "ring-1" : ""}" style="${idea.pinned ? "border-color: var(--accent);" : ""}">
+            grid.innerHTML = filtered.map(i => `
+                <div class="theme-surface-card p-4 flex flex-col gap-3 ${i.pinned ? "ring-1" : ""}" style="${i.pinned ? "border-color: var(--accent);" : ""}">
                     <div class="flex items-start justify-between gap-2">
                         <div class="min-w-0">
-                            ${idea.title ? `<h4 class="font-bold text-sm theme-text leading-snug">${esc(idea.title)}</h4>` : ""}
-                            <div class="flex flex-wrap gap-1 mt-1">
-                                ${(idea.tags || []).map(t => `<span class="tag-pill text-[10px] font-semibold px-2 py-0.5 rounded-full">#${esc(t)}</span>`).join("")}
-                            </div>
+                            ${i.title ? `<h4 class="font-bold text-sm sm:text-base theme-text leading-snug">${esc(i.title)}</h4>` : `<span class="text-[11px] uppercase tracking-wider theme-muted font-semibold">Nota Rápida</span>`}
                         </div>
-                        <button onclick="app.toggleIdeaPin('${idea.id}')" class="btn-ghost p-1.5 rounded-lg text-xs shrink-0 ${idea.pinned ? "theme-accent-text" : ""}" title="${idea.pinned ? "Desafixar" : "Fixar no topo"}">
-                            ${idea.pinned ? "📌" : "📍"}
-                        </button>
+                        <button onclick="app.toggleIdeaPin('${i.id}')" class="btn-ghost p-1 text-xs shrink-0 ${i.pinned ? "theme-accent-text" : "opacity-60"}" title="${i.pinned ? "Desafixar" : "Fixar no topo"}">📌</button>
                     </div>
-                    <p class="text-xs sm:text-sm theme-muted whitespace-pre-wrap leading-relaxed flex-1">${esc(idea.text)}</p>
+                    <p class="text-xs sm:text-sm theme-muted whitespace-pre-wrap leading-relaxed flex-1 break-words">${esc(i.text)}</p>
+                    ${(i.tags && i.tags.length > 0) ? `
+                        <div class="flex flex-wrap gap-1.5">
+                            ${i.tags.map(t => `<span class="tag-pill text-[10px] font-semibold px-2 py-0.5 rounded-full">#${esc(t)}</span>`).join("")}
+                        </div>
+                    ` : ""}
                     <div class="pt-2.5 border-t theme-border flex items-center justify-between gap-2">
-                        <button onclick="app.promoteIdeaToKanban('${idea.id}')" class="btn-secondary px-2.5 py-1.5 rounded-lg text-[11px] font-semibold theme-accent-text">
-                            ↗ Virar Post-it
-                        </button>
+                        <button onclick="app.promoteIdeaToKanban('${i.id}')" class="btn-secondary px-2.5 py-1 text-[11px] font-semibold theme-accent-text" title="Criar cartão no Quadro Kanban">↗ Virar Post-it</button>
                         <div class="flex items-center gap-1">
-                            <button onclick="app.editIdea('${idea.id}')" class="btn-ghost p-1.5 rounded-lg text-xs" title="Editar">✏️</button>
-                            <button onclick="app.deleteIdea('${idea.id}')" class="btn-danger-ghost p-1.5 rounded-lg text-xs" title="Excluir">🗑️</button>
+                            <button onclick="app.editIdea('${i.id}')" class="btn-ghost p-1 text-xs" title="Editar">✏️</button>
+                            <button onclick="app.deleteIdea('${i.id}')" class="btn-danger-ghost p-1 text-xs" title="Excluir">🗑️</button>
                         </div>
                     </div>
                 </div>
@@ -2425,11 +2996,11 @@
         // 12. MÓDULO 3: LINKS & REDES
         // =========================================================
         function detectPlatform(url) {
-            const u = (url || "").toLowerCase();
+            const u = String(url || "").toLowerCase();
             if (u.includes("tiktok.com")) return "TikTok";
             if (u.includes("instagram.com") || u.includes("instagr.am")) return "Instagram";
             if (u.includes("youtube.com") || u.includes("youtu.be")) return "YouTube";
-            if (u.includes("twitter.com") || u.includes("x.com")) return "X/Twitter";
+            if (u.includes("twitter.com") || u.includes("x.com")) return "X / Twitter";
             return "Web";
         }
 
@@ -2437,93 +3008,106 @@
             if (platform === "TikTok") return "badge-tiktok";
             if (platform === "Instagram") return "badge-insta";
             if (platform === "YouTube") return "badge-yt";
-            if (platform === "X/Twitter") return "badge-x";
+            if (platform === "X / Twitter") return "badge-x";
             return "badge-web";
         }
 
         function renderLinks() {
-            const platforms = ["all", "TikTok", "Instagram", "YouTube", "X/Twitter", "Web"];
-            const pfEl = document.getElementById("linkPlatformFilters");
-            pfEl.innerHTML = platforms.map(p => {
-                const active = selectedLinkPlatform === p;
-                return `<button onclick="app.setLinkPlatformFilter('${p}')" class="px-2.5 py-1.5 rounded-lg text-xs font-semibold shrink-0 ${active ? "btn-primary" : "btn-secondary"}">${p === "all" ? "Todas" : p}</button>`;
-            }).join("");
+            const platforms = ["all", "TikTok", "Instagram", "YouTube", "X / Twitter", "Web"];
+            const filterBar = document.getElementById("linkPlatformFilters");
+            if (filterBar) {
+                filterBar.innerHTML = platforms.map(p => {
+                    const active = selectedLinkPlatform === p;
+                    return `<button onclick="app.setLinkPlatformFilter('${p}')" class="px-2.5 py-1.5 text-xs font-semibold shrink-0 ${active ? "btn-primary" : "btn-secondary"}">${p === "all" ? "Todas" : p}</button>`;
+                }).join("");
+            }
 
             const term = (document.getElementById("linkSearchInput")?.value || "").trim().toLowerCase();
-            const statusF = document.getElementById("linkStatusFilter")?.value || "all";
+            const statusF = document.getElementById("linkStatusFilter")?.value || "pending";
 
-            const filtered = (state.links || []).filter(item => {
-                if (selectedLinkPlatform !== "all" && item.platform !== selectedLinkPlatform) return false;
-                if (statusF === "pending" && item.watched) return false;
-                if (statusF === "watched" && !item.watched) return false;
-                if (!term) return true;
-                return (
-                    (item.title || "").toLowerCase().includes(term) ||
-                    (item.url || "").toLowerCase().includes(term) ||
-                    (item.note || "").toLowerCase().includes(term) ||
-                    (item.tags || []).some(t => t.toLowerCase().includes(term))
-                );
-            }).sort((a, b) => (Number(!!a.watched) - Number(!!b.watched)) || ((b.createdAt || 0) - (a.createdAt || 0)));
+            const filtered = (state.links || [])
+                .filter(l => {
+                    const plat = l.platform || detectPlatform(l.url);
+                    if (selectedLinkPlatform !== "all" && plat !== selectedLinkPlatform) return false;
+                    if (statusF === "pending" && l.watched) return false;
+                    if (statusF === "watched" && !l.watched) return false;
+                    if (!term) return true;
+                    return (
+                        (l.title || "").toLowerCase().includes(term) ||
+                        (l.url || "").toLowerCase().includes(term) ||
+                        (l.note || "").toLowerCase().includes(term) ||
+                        (l.tags || []).some(t => t.toLowerCase().includes(term))
+                    );
+                })
+                .sort((a, b) => (Number(!!a.watched) - Number(!!b.watched)) || ((b.createdAt || 0) - (a.createdAt || 0)));
 
             const grid = document.getElementById("linksGrid");
+            if (!grid) return;
+
             if (filtered.length === 0) {
-                grid.innerHTML = `<div class="col-span-full theme-surface-card rounded-xl p-8 text-center theme-muted">Nenhum link neste filtro.</div>`;
+                grid.innerHTML = `<div class="col-span-full theme-surface-card p-8 text-center theme-muted">Nenhum link encontrado neste filtro.</div>`;
                 return;
             }
 
-            grid.innerHTML = filtered.map(item => `
-                <div class="theme-surface-card rounded-xl p-4 flex flex-col gap-2.5 ${item.watched ? "opacity-65" : ""}">
-                    <div class="flex items-center justify-between gap-2">
-                        <span class="text-[11px] font-bold px-2.5 py-0.5 rounded-full ${getPlatformBadgeClass(item.platform)}">${esc(item.platform)}</span>
-                        <button onclick="app.toggleLinkWatched('${item.id}')" class="text-[11px] px-2 py-0.5 rounded-lg font-semibold ${item.watched ? "badge-emerald" : "btn-secondary"}">
-                            ${item.watched ? "✓ Visto" : "Marcar visto"}
-                        </button>
-                    </div>
-                    <h4 class="font-semibold text-sm theme-text leading-snug ${item.watched ? "line-through" : ""}">${esc(item.title)}</h4>
-                    ${item.note ? `<p class="text-xs theme-muted">${esc(item.note)}</p>` : ""}
-                    <div class="flex flex-wrap gap-1">
-                        ${(item.tags || []).map(t => `<span class="tag-pill text-[10px] font-semibold px-2 py-0.5 rounded-full">#${esc(t)}</span>`).join("")}
-                    </div>
-                    <div class="mt-auto pt-2.5 border-t theme-border flex items-center justify-between gap-2">
-                        <a href="${esc(item.url)}" target="_blank" rel="noopener noreferrer" class="btn-primary px-3 py-1.5 rounded-lg text-xs font-semibold inline-flex items-center gap-1">
-                            Abrir Link ↗
-                        </a>
-                        <div class="flex items-center gap-1">
-                            <button onclick="app.editLinkItem('${item.id}')" class="btn-ghost p-1.5 rounded-lg text-xs" title="Editar">✏️</button>
-                            <button onclick="app.deleteLinkItem('${item.id}')" class="btn-danger-ghost p-1.5 rounded-lg text-xs" title="Excluir">🗑️</button>
+            grid.innerHTML = filtered.map(l => {
+                const plat = l.platform || detectPlatform(l.url);
+                const badgeCls = getPlatformBadgeClass(plat);
+                return `
+                    <div class="theme-surface-card p-4 flex flex-col gap-2.5 ${l.watched ? "opacity-65" : ""}">
+                        <div class="flex items-center justify-between gap-2">
+                            <span class="text-[10px] font-bold px-2 py-0.5 rounded-full ${badgeCls}">${esc(plat)}</span>
+                            <button onclick="app.toggleLinkWatched('${l.id}')" class="text-[11px] font-semibold px-2 py-0.5 rounded-full ${l.watched ? "badge-emerald" : "btn-secondary"}">
+                                ${l.watched ? "✓ Visto" : "Marcar visto"}
+                            </button>
+                        </div>
+                        <a href="${esc(l.url)}" target="_blank" rel="noopener noreferrer" class="font-bold text-sm theme-text hover:underline leading-snug break-words">${esc(l.title)}</a>
+                        <a href="${esc(l.url)}" target="_blank" rel="noopener noreferrer" class="text-[11px] mono theme-accent-text truncate hover:underline">${esc(l.url)}</a>
+                        ${l.note ? `<p class="text-xs theme-muted leading-relaxed break-words">${esc(l.note)}</p>` : ""}
+                        ${(l.tags && l.tags.length > 0) ? `
+                            <div class="flex flex-wrap gap-1.5 mt-auto pt-1">
+                                ${l.tags.map(t => `<span class="tag-pill text-[10px] font-semibold px-2 py-0.5 rounded-full">#${esc(t)}</span>`).join("")}
+                            </div>
+                        ` : ""}
+                        <div class="pt-2.5 border-t theme-border flex items-center justify-between gap-2 mt-auto">
+                            <a href="${esc(l.url)}" target="_blank" rel="noopener noreferrer" class="btn-secondary px-2.5 py-1 text-[11px] font-semibold">Abrir ↗</a>
+                            <div class="flex items-center gap-1">
+                                <button onclick="app.editLinkItem('${l.id}')" class="btn-ghost p-1 text-xs" title="Editar">✏️</button>
+                                <button onclick="app.deleteLinkItem('${l.id}')" class="btn-danger-ghost p-1 text-xs" title="Excluir">🗑️</button>
+                            </div>
                         </div>
                     </div>
-                </div>
-            `).join("");
+                `;
+            }).join("");
         }
 
         // =========================================================
         // 13. MÓDULO 4: LISTAS & CHECKLISTS
         // =========================================================
         function renderLists() {
+            const lists = state.lists || [];
             const sidebar = document.getElementById("listsSidebar");
             const container = document.getElementById("activeListContainer");
-            const lists = state.lists || [];
+            if (!sidebar || !container) return;
 
             if (lists.length > 0 && !lists.some(l => l.id === activeListId)) {
                 activeListId = lists[0].id;
             }
 
             if (lists.length === 0) {
-                sidebar.innerHTML = `<p class="text-xs theme-muted text-center py-4">Nenhuma lista criada.</p>`;
-                container.innerHTML = `<div class="h-full flex flex-col items-center justify-center text-center theme-muted py-12"><p class="font-semibold theme-text">Crie sua primeira lista</p><p class="text-xs mt-1">Ex: Mercado, Xerox da Faculdade, Viagem...</p></div>`;
+                sidebar.innerHTML = `<p class="text-xs theme-muted text-center py-4">Nenhuma lista criada ainda.</p>`;
+                container.innerHTML = `<div class="text-center py-12 theme-muted"><p class="font-semibold theme-text">Crie sua primeira lista</p><p class="text-xs mt-1">Mercado, xerox da faculdade, compras ou tarefas rápidas.</p></div>`;
                 return;
             }
 
-            sidebar.innerHTML = lists.map(lst => {
-                const total = (lst.items || []).length;
-                const done = (lst.items || []).filter(i => i.done).length;
-                const active = lst.id === activeListId;
+            sidebar.innerHTML = lists.map(l => {
+                const total = (l.items || []).length;
+                const done = (l.items || []).filter(i => i.done).length;
+                const active = l.id === activeListId;
                 return `
-                    <button onclick="app.selectList('${lst.id}')" class="w-full p-3 rounded-xl border text-left flex items-center justify-between gap-2 transition-colors ${active ? "nav-item-active" : "theme-sub-card theme-hover"}">
+                    <button onclick="app.selectList('${l.id}')" class="w-full p-3 border text-left flex items-center justify-between gap-2 transition-colors ${active ? "nav-item-active font-semibold" : "theme-sub-card theme-hover"}">
                         <div class="flex items-center gap-2.5 min-w-0">
-                            <span class="text-lg shrink-0">${esc(lst.icon || "📝")}</span>
-                            <span class="font-semibold text-sm theme-text truncate">${esc(lst.name)}</span>
+                            <span class="text-base shrink-0">${esc(l.icon || "📝")}</span>
+                            <span class="text-sm theme-text truncate">${esc(l.name)}</span>
                         </div>
                         <span class="text-[11px] mono theme-muted shrink-0">${done}/${total}</span>
                     </button>
@@ -2533,22 +3117,24 @@
             const cur = lists.find(l => l.id === activeListId);
             if (!cur) return;
 
-            const total = (cur.items || []).length;
-            const done = (cur.items || []).filter(i => i.done).length;
+            const items = cur.items || [];
+            const total = items.length;
+            const done = items.filter(i => i.done).length;
             const pct = total > 0 ? Math.round((done / total) * 100) : 0;
+            const sortedItems = [...items].sort((a, b) => Number(!!a.done) - Number(!!b.done));
 
             container.innerHTML = `
-                <div class="flex flex-wrap items-center justify-between gap-2 pb-4 border-b theme-border">
+                <div class="flex flex-wrap items-center justify-between gap-3 pb-4 border-b theme-border">
                     <div class="flex items-center gap-2.5">
                         <span class="text-2xl">${esc(cur.icon || "📝")}</span>
                         <div>
-                            <h3 class="font-bold text-base theme-text">${esc(cur.name)}</h3>
-                            <p class="text-xs theme-muted">${done} de ${total} concluídos (${pct}%)</p>
+                            <h3 class="text-lg font-bold theme-text">${esc(cur.name)}</h3>
+                            <p class="text-xs theme-muted">${done} de ${total} marcados (${pct}%)</p>
                         </div>
                     </div>
                     <div class="flex items-center gap-2">
-                        ${done > 0 ? `<button onclick="app.clearDoneListItems('${cur.id}')" class="btn-secondary px-2.5 py-1.5 rounded-lg text-xs font-semibold">Limpar concluídos</button>` : ""}
-                        <button onclick="app.deleteList('${cur.id}')" class="btn-danger-outline px-2.5 py-1.5 rounded-lg text-xs font-semibold">Excluir Lista</button>
+                        ${done > 0 ? `<button onclick="app.clearDoneListItems('${cur.id}')" class="btn-secondary px-3 py-1.5 text-xs font-semibold">Limpar marcados</button>` : ""}
+                        <button onclick="app.deleteList('${cur.id}')" class="btn-danger-outline px-3 py-1.5 text-xs font-semibold">Excluir Lista</button>
                     </div>
                 </div>
 
@@ -2557,18 +3143,18 @@
                 </div>
 
                 <form onsubmit="app.addListItem(event, '${cur.id}')" class="flex gap-2 mb-4">
-                    <input type="text" id="newListItemInput" required placeholder="Adicionar item em ${esc(cur.name)}..." class="flex-1 input-themed rounded-xl px-3.5 py-2.5 text-sm">
-                    <button type="submit" class="btn-primary px-4 py-2.5 rounded-xl text-xs sm:text-sm font-semibold shrink-0">Adicionar</button>
+                    <input type="text" id="newListItemInput" required placeholder="Adicionar item em ${esc(cur.name)}..." class="flex-1 input-themed px-3.5 py-2 text-sm">
+                    <button type="submit" class="btn-primary px-4 py-2 text-xs sm:text-sm font-semibold shrink-0">+ Adicionar</button>
                 </form>
 
                 <div class="space-y-2">
-                    ${total === 0 ? `<p class="text-xs theme-muted text-center py-6">Lista vazia. Adicione o primeiro item acima!</p>` : cur.items.map(item => `
-                        <div class="theme-sub-card rounded-xl px-3.5 py-2.5 flex items-center justify-between gap-3">
+                    ${sortedItems.length === 0 ? `<p class="text-xs theme-muted text-center py-8">Lista vazia. Adicione o primeiro item acima!</p>` : sortedItems.map(item => `
+                        <div class="theme-sub-card px-3.5 py-2.5 flex items-center justify-between gap-3">
                             <label class="flex items-center gap-3 flex-1 cursor-pointer min-w-0">
                                 <input type="checkbox" ${item.done ? "checked" : ""} onchange="app.toggleListItem('${cur.id}', '${item.id}')" class="w-4 h-4 checkbox-accent rounded shrink-0">
                                 <span class="text-sm break-words ${item.done ? "line-through theme-muted" : "theme-text"}">${esc(item.text)}</span>
                             </label>
-                            <button onclick="app.deleteListItem('${cur.id}', '${item.id}')" class="btn-danger-ghost p-1 rounded-lg text-xs shrink-0" title="Remover item">✕</button>
+                            <button onclick="app.deleteListItem('${cur.id}', '${item.id}')" class="btn-danger-ghost p-1 text-xs shrink-0" title="Remover item">✕</button>
                         </div>
                     `).join("")}
                 </div>
@@ -2576,8 +3162,28 @@
         }
 
         // =========================================================
-        // 14. MÓDULO 5: PROJETOS ATIVOS
+        // 14. MÓDULO 5: PROJETOS ATIVOS (COM PALETA DE CORES)
         // =========================================================
+        function renderProjectColorSwatches(selectedHex) {
+            const container = document.getElementById("projectColorPalette");
+            const input = document.getElementById("projColorInput");
+            const label = document.getElementById("projColorHexLabel");
+            if (!container) return;
+
+            const normalized = (selectedHex || "#7852ee").toLowerCase();
+            if (input) input.value = normalized;
+            if (label) label.textContent = normalized;
+
+            container.innerHTML = PROJECT_COLORS.map(c => {
+                const isSel = c.hex.toLowerCase() === normalized;
+                return `
+                    <button type="button" onclick="app.selectModalProjectColor('${c.hex}')" title="${c.name} (${c.hex})" class="w-7 h-7 rounded-full transition-transform hover:scale-110 flex items-center justify-center ${isSel ? "ring-2 ring-offset-2 ring-offset-[var(--bg-input)] scale-110" : ""}" style="background-color:${c.hex}; ${isSel ? `box-shadow: 0 0 10px ${c.hex};` : ""}">
+                        ${isSel ? `<span class="text-[11px] font-bold text-white drop-shadow">✓</span>` : ""}
+                    </button>
+                `;
+            }).join("");
+        }
+
         function renderProjects() {
             const projects = state.projects || [];
             const grid = document.getElementById("projectsGrid");
@@ -2593,93 +3199,124 @@
                 return;
             }
 
+            const getProjStatusBadge = (st) => {
+                if (st === "Ativo") return "badge-emerald";
+                if (st === "Planejamento") return "badge-sky";
+                if (st === "Pausado") return "badge-amber";
+                return "badge-web";
+            };
+
             grid.innerHTML = projects.map(p => {
+                const pColor = p.color || "#7852ee";
                 const total = (p.features || []).length;
                 const done = (p.features || []).filter(f => f.done).length;
                 const pct = total > 0 ? Math.round((done / total) * 100) : 0;
                 const active = p.id === activeProjectId;
-                const statusBadge = p.status === "Ativo" ? "badge-emerald" : p.status === "Pausado" ? "badge-amber" : p.status === "Concluído" ? "badge-sky" : "badge-web";
+
                 return `
-                    <button onclick="app.selectProject('${p.id}')" class="theme-surface-card rounded-xl p-4 text-left transition-all flex flex-col gap-2 ${active ? "ring-2" : "theme-hover"}" style="${active ? "border-color: var(--accent);" : ""}">
-                        <div class="flex items-center justify-between gap-2 w-full">
-                            <h4 class="font-bold text-sm theme-text truncate">${esc(p.name)}</h4>
-                            <span class="text-[10px] font-bold px-2 py-0.5 rounded-full ${statusBadge} shrink-0">${esc(p.status)}</span>
+                    <div onclick="app.selectProject('${p.id}')" class="theme-surface-card p-4 flex flex-col gap-3 cursor-pointer border-l-4 transition-all ${active ? "ring-1" : "theme-hover"}" style="border-left-color: ${esc(pColor)}; ${active ? `border-color: ${esc(pColor)};` : ""}">
+                        <div class="flex items-start justify-between gap-2">
+                            <div class="min-w-0">
+                                <div class="flex items-center gap-2 mb-1">
+                                    <button type="button" onclick="event.stopPropagation(); app.openProjectColorModal('${p.id}')" class="w-3.5 h-3.5 rounded-full shrink-0 border theme-border-strong hover:scale-110 transition-transform" style="background-color: ${esc(pColor)};" title="Trocar cor do projeto"></button>
+                                    <span class="text-[10px] font-bold px-2 py-0.5 rounded-full ${getProjStatusBadge(p.status)}">${esc(p.status || "Ativo")}</span>
+                                </div>
+                                <h4 class="font-bold text-sm sm:text-base theme-text truncate">${esc(p.name)}</h4>
+                            </div>
+                            <div class="flex items-center gap-0.5 shrink-0">
+                                <button type="button" onclick="event.stopPropagation(); app.openProjectModal('${p.id}')" class="btn-ghost p-1 text-xs" title="Editar projeto">✏️</button>
+                                <button type="button" onclick="event.stopPropagation(); app.deleteProject('${p.id}')" class="btn-danger-ghost p-1 text-xs" title="Excluir projeto">🗑️</button>
+                            </div>
                         </div>
-                        <p class="text-xs theme-muted line-clamp-2">${esc(p.desc || "Sem descrição.")}</p>
-                        <div class="w-full pt-1 mt-auto">
+                        ${p.desc ? `<p class="text-xs theme-muted line-clamp-2 leading-relaxed">${esc(p.desc)}</p>` : ""}
+                        <div class="mt-auto pt-1">
                             <div class="flex justify-between text-[11px] mono theme-muted mb-1">
                                 <span>${done}/${total} features</span>
-                                <span>${pct}%</span>
+                                <span class="font-semibold" style="color: ${esc(pColor)};">${pct}%</span>
                             </div>
-                            <div class="w-full h-1.5 rounded-full theme-input-bg overflow-hidden">
-                                <div class="h-full" style="width:${pct}%; background-color: var(--accent);"></div>
+                            <div class="w-full h-2 rounded-full theme-input-bg overflow-hidden">
+                                <div class="h-full transition-all duration-300" style="width:${pct}%; background-color: ${esc(pColor)};"></div>
                             </div>
                         </div>
-                    </button>
+                    </div>
                 `;
             }).join("");
 
             const cur = projects.find(p => p.id === activeProjectId);
             if (!cur) return;
 
-            const total = (cur.features || []).length;
-            const done = (cur.features || []).filter(f => f.done).length;
-            const pct = total > 0 ? Math.round((done / total) * 100) : 0;
+            const curColor = cur.color || "#7852ee";
+            const features = cur.features || [];
+            const fTotal = features.length;
+            const fDone = features.filter(f => f.done).length;
+            const fPct = fTotal > 0 ? Math.round((fDone / fTotal) * 100) : 0;
+            const prioRank = { "Alta": 0, "Média": 1, "Baixa": 2 };
+            const sortedFeatures = [...features].sort((a, b) =>
+                (Number(!!a.done) - Number(!!b.done)) ||
+                ((prioRank[a.priority] ?? 1) - (prioRank[b.priority] ?? 1))
+            );
 
-            const prioOrder = { Alta: 0, Média: 1, Baixa: 2 };
-            const sortedFeatures = [...(cur.features || [])].sort((a, b) => (Number(!!a.done) - Number(!!b.done)) || ((prioOrder[a.priority] ?? 1) - (prioOrder[b.priority] ?? 1)));
+            const getPrioBadge = (pr) => {
+                if (pr === "Alta") return "badge-red";
+                if (pr === "Baixa") return "badge-sky";
+                return "badge-amber";
+            };
 
             panel.innerHTML = `
                 <div class="flex flex-wrap items-start justify-between gap-3 pb-4 border-b theme-border">
-                    <div>
-                        <div class="flex items-center gap-2">
+                    <div class="min-w-0 flex-1">
+                        <div class="flex items-center flex-wrap gap-2 mb-1">
+                            <button type="button" onclick="app.openProjectColorModal('${cur.id}')" class="w-4 h-4 rounded-full shrink-0 border theme-border-strong hover:scale-110 transition-transform" style="background-color: ${esc(curColor)};" title="Trocar cor do projeto"></button>
                             <h3 class="text-lg font-bold theme-text">${esc(cur.name)}</h3>
-                            <span class="text-[11px] font-semibold px-2 py-0.5 rounded-full tag-pill">${esc(cur.status)}</span>
+                            <span class="text-[11px] font-bold px-2.5 py-0.5 rounded-full ${getProjStatusBadge(cur.status)}">${esc(cur.status || "Ativo")}</span>
                         </div>
-                        <p class="text-xs sm:text-sm theme-muted mt-1">${esc(cur.desc || "Sem descrição.")}</p>
+                        ${cur.desc ? `<p class="text-xs sm:text-sm theme-muted leading-relaxed">${esc(cur.desc)}</p>` : ""}
                     </div>
-                    <div class="flex items-center gap-2">
-                        <button onclick="app.openProjectModal('${cur.id}')" class="btn-secondary px-3 py-1.5 rounded-lg text-xs font-semibold">Editar</button>
-                        <button onclick="app.deleteProject('${cur.id}')" class="btn-danger-outline px-3 py-1.5 rounded-lg text-xs font-semibold">Excluir</button>
+                    <div class="flex items-center gap-2 shrink-0">
+                        <button onclick="app.openProjectColorModal('${cur.id}')" class="btn-secondary px-3 py-1.5 text-xs font-semibold flex items-center gap-1.5">
+                            <span class="w-2.5 h-2.5 rounded-full" style="background-color: ${esc(curColor)};"></span>
+                            Cor
+                        </button>
+                        <button onclick="app.openProjectModal('${cur.id}')" class="btn-secondary px-3 py-1.5 text-xs font-semibold">Editar</button>
+                        <button onclick="app.deleteProject('${cur.id}')" class="btn-danger-outline px-3 py-1.5 text-xs font-semibold">Excluir</button>
                     </div>
                 </div>
 
                 <div class="my-4">
-                    <div class="flex justify-between text-xs theme-muted mb-1.5">
-                        <span>Progresso do Roadmap</span>
-                        <span class="mono font-semibold theme-text">${done}/${total} (${pct}%)</span>
+                    <div class="flex justify-between text-xs mono theme-muted mb-1.5">
+                        <span>Progresso do roadmap (${fDone}/${fTotal})</span>
+                        <span class="font-bold" style="color: ${esc(curColor)};">${fPct}%</span>
                     </div>
                     <div class="w-full h-2.5 rounded-full theme-input-bg overflow-hidden">
-                        <div class="h-full transition-all duration-300" style="width:${pct}%; background-color: var(--accent);"></div>
+                        <div class="h-full transition-all duration-300" style="width:${fPct}%; background-color: ${esc(curColor)};"></div>
                     </div>
                 </div>
 
                 <form onsubmit="app.addProjectFeature(event, '${cur.id}')" class="flex flex-col sm:flex-row gap-2 mb-4">
-                    <input type="text" id="newFeatureTitle" required placeholder="Nova feature, melhoria ou tarefa do projeto..." class="flex-1 input-themed rounded-xl px-3.5 py-2 text-sm">
-                    <select id="newFeaturePriority" class="input-themed rounded-xl px-3 py-2 text-xs sm:w-32">
-                        <option value="Alta">Alta</option>
-                        <option value="Média" selected>Média</option>
-                        <option value="Baixa">Baixa</option>
-                    </select>
-                    <button type="submit" class="btn-primary px-4 py-2 rounded-xl text-xs sm:text-sm font-semibold shrink-0">+ Feature</button>
+                    <input type="text" id="newFeatureTitle" required placeholder="Nova feature ou tarefa para ${esc(cur.name)}..." class="flex-1 input-themed px-3.5 py-2 text-sm">
+                    <div class="flex gap-2">
+                        <select id="newFeaturePriority" class="input-themed px-3 py-2 text-xs">
+                            <option value="Alta">Prioridade Alta</option>
+                            <option value="Média" selected>Prioridade Média</option>
+                            <option value="Baixa">Prioridade Baixa</option>
+                        </select>
+                        <button type="submit" class="btn-primary px-4 py-2 text-xs sm:text-sm font-semibold shrink-0">+ Adicionar</button>
+                    </div>
                 </form>
 
                 <div class="space-y-2">
-                    ${sortedFeatures.length === 0 ? `<p class="text-xs theme-muted text-center py-6">Nenhuma feature no backlog deste projeto.</p>` : sortedFeatures.map(f => {
-                        const pCls = f.priority === "Alta" ? "badge-red" : f.priority === "Média" ? "badge-amber" : "badge-sky";
-                        return `
-                            <div class="theme-sub-card rounded-xl px-3.5 py-2.5 flex items-center justify-between gap-3">
-                                <label class="flex items-center gap-3 flex-1 cursor-pointer min-w-0">
-                                    <input type="checkbox" ${f.done ? "checked" : ""} onchange="app.toggleProjectFeature('${cur.id}', '${f.id}')" class="w-4 h-4 checkbox-accent rounded shrink-0">
-                                    <span class="text-sm break-words ${f.done ? "line-through theme-muted" : "theme-text"}">${esc(f.title)}</span>
-                                </label>
-                                <div class="flex items-center gap-2 shrink-0">
-                                    <span class="text-[10px] font-bold px-2 py-0.5 rounded-full ${pCls}">${esc(f.priority)}</span>
-                                    <button onclick="app.deleteProjectFeature('${cur.id}', '${f.id}')" class="btn-danger-ghost p-1 rounded-lg text-xs" title="Remover">✕</button>
-                                </div>
+                    ${sortedFeatures.length === 0 ? `<p class="text-xs theme-muted text-center py-6">Nenhuma feature cadastrada ainda. Adicione a primeira acima!</p>` : sortedFeatures.map(f => `
+                        <div class="theme-sub-card px-3.5 py-2.5 flex items-center justify-between gap-3">
+                            <label class="flex items-center gap-3 flex-1 cursor-pointer min-w-0">
+                                <input type="checkbox" ${f.done ? "checked" : ""} onchange="app.toggleProjectFeature('${cur.id}', '${f.id}')" class="w-4 h-4 checkbox-accent rounded shrink-0">
+                                <span class="text-sm break-words ${f.done ? "line-through theme-muted" : "theme-text"}">${esc(f.title)}</span>
+                            </label>
+                            <div class="flex items-center gap-2 shrink-0">
+                                <span class="text-[10px] font-bold px-2 py-0.5 rounded-full ${getPrioBadge(f.priority)}">${esc(f.priority || "Média")}</span>
+                                <button onclick="app.deleteProjectFeature('${cur.id}', '${f.id}')" class="btn-danger-ghost p-1 text-xs" title="Remover feature">✕</button>
                             </div>
-                        `;
-                    }).join("")}
+                        </div>
+                    `).join("")}
                 </div>
             `;
         }
@@ -2689,108 +3326,140 @@
         // =========================================================
         function renderCalendar() {
             const monthDate = new Date(calYear, calMonth, 1);
-            document.getElementById("calendarMonthLabel").textContent = monthDate.toLocaleDateString("pt-BR", { month: "long", year: "numeric" });
+            const monthLabel = document.getElementById("calendarMonthLabel");
+            if (monthLabel) {
+                monthLabel.textContent = monthDate.toLocaleDateString("pt-BR", { month: "long", year: "numeric" });
+            }
 
-            const firstWeekday = monthDate.getDay();
-            const daysInMonth = new Date(calYear, calMonth + 1, 0).getDate();
-            const todayKey = formatDateKey(new Date());
-
-            // Mapa de eventos por data
+            const events = state.calendar || [];
             const eventsByDate = {};
-            (state.calendar || []).forEach(ev => {
+            events.forEach(ev => {
                 if (!eventsByDate[ev.date]) eventsByDate[ev.date] = [];
                 eventsByDate[ev.date].push(ev);
             });
 
+            const todayKey = formatDateKey(new Date());
+            const firstDow = monthDate.getDay();
+            const daysInMonth = new Date(calYear, calMonth + 1, 0).getDate();
+
             const grid = document.getElementById("calendarDaysGrid");
-            let html = "";
+            if (grid) {
+                let html = "";
+                for (let i = 0; i < firstDow; i++) {
+                    html += `<div class="h-12 sm:h-14"></div>`;
+                }
+                for (let d = 1; d <= daysInMonth; d++) {
+                    const key = `${calYear}-${String(calMonth + 1).padStart(2, "0")}-${String(d).padStart(2, "0")}`;
+                    const dayEvents = eventsByDate[key] || [];
+                    const isSelected = key === selectedDateKey;
+                    const isToday = key === todayKey;
 
-            for (let i = 0; i < firstWeekday; i++) {
-                html += `<div class="h-12 sm:h-14 rounded-xl opacity-20"></div>`;
-            }
-
-            for (let day = 1; day <= daysInMonth; day++) {
-                const key = `${calYear}-${String(calMonth + 1).padStart(2, "0")}-${String(day).padStart(2, "0")}`;
-                const dayEvents = eventsByDate[key] || [];
-                const isSelected = key === selectedDateKey;
-                const isToday = key === todayKey;
-
-                html += `
-                    <button onclick="app.selectCalendarDay('${key}')" class="h-12 sm:h-14 rounded-xl border p-1.5 flex flex-col items-center justify-between transition-all ${isSelected ? "nav-item-active font-bold" : "theme-sub-card theme-hover"}" style="${isToday && !isSelected ? "border-color: var(--accent);" : ""}">
-                        <span class="text-xs sm:text-sm ${isToday ? "theme-accent-text font-bold" : "theme-text"}">${day}</span>
-                        <div class="flex items-center justify-center gap-0.5 flex-wrap max-w-full">
-                            ${dayEvents.slice(0, 4).map(ev => `<span class="w-1.5 h-1.5 rounded-full" style="background:${esc(ev.color || "#7852ee")};"></span>`).join("")}
-                        </div>
-                    </button>
-                `;
-            }
-
-            grid.innerHTML = html;
-
-            // Dia selecionado
-            const [sy, sm, sd] = selectedDateKey.split("-").map(Number);
-            const selObj = new Date(sy, sm - 1, sd);
-            document.getElementById("selectedDateHeading").textContent = selObj.toLocaleDateString("pt-BR", { weekday: "long", day: "2-digit", month: "long", year: "numeric" });
-
-            const selEvents = (eventsByDate[selectedDateKey] || []).sort((a, b) => (a.time || "99:99").localeCompare(b.time || "99:99"));
-            const selList = document.getElementById("selectedDayEventsList");
-            if (selEvents.length === 0) {
-                selList.innerHTML = `<p class="text-xs theme-muted italic py-2">Nenhum compromisso marcado para este dia.</p>`;
-            } else {
-                selList.innerHTML = selEvents.map(ev => `
-                    <div class="theme-sub-card rounded-xl p-3 flex items-start justify-between gap-2.5 border-l-4" style="border-left-color: ${esc(ev.color || "#7852ee")};">
-                        <div class="min-w-0">
-                            <div class="flex items-center gap-2">
-                                ${ev.time ? `<span class="mono text-[11px] font-bold theme-accent-text">${esc(ev.time)}</span>` : ""}
-                                <span class="font-semibold text-sm theme-text">${esc(ev.title)}</span>
+                    html += `
+                        <button onclick="app.selectCalendarDay('${key}')" class="h-12 sm:h-14 p-1.5 border flex flex-col items-center justify-between transition-colors ${isSelected ? "nav-item-active font-bold ring-1" : "theme-sub-card theme-hover"}" style="${isToday && !isSelected ? "border-color: var(--accent);" : ""}">
+                            <span class="text-xs mono ${isToday ? "theme-accent-text font-bold" : "theme-text"}">${d}</span>
+                            <div class="flex items-center justify-center gap-0.5 flex-wrap max-w-full">
+                                ${dayEvents.slice(0, 4).map(ev => `<span class="w-1.5 h-1.5 rounded-full" style="background-color:${esc(ev.color || "#7852ee")};"></span>`).join("")}
                             </div>
-                            ${ev.note ? `<p class="text-xs theme-muted mt-0.5">${esc(ev.note)}</p>` : ""}
-                        </div>
-                        <button onclick="app.deleteCalendarEvent('${ev.id}')" class="btn-danger-ghost p-1 rounded-lg text-xs shrink-0" title="Remover">🗑️</button>
-                    </div>
-                `).join("");
-            }
-
-            // Próximos Compromissos
-            const upcoming = (state.calendar || [])
-                .filter(ev => ev.date >= todayKey)
-                .sort((a, b) => a.date.localeCompare(b.date) || (a.time || "99:99").localeCompare(b.time || "99:99"))
-                .slice(0, 6);
-
-            const upList = document.getElementById("upcomingEventsList");
-            if (upcoming.length === 0) {
-                upList.innerHTML = `<p class="text-xs theme-muted italic">Sem próximos compromissos agendados.</p>`;
-            } else {
-                upList.innerHTML = upcoming.map(ev => {
-                    const [, m, d] = ev.date.split("-");
-                    return `
-                        <button onclick="app.jumpToCalendarDate('${ev.date}')" class="w-full theme-sub-card theme-hover rounded-xl px-3 py-2 flex items-center justify-between gap-2 text-left">
-                            <div class="flex items-center gap-2.5 min-w-0">
-                                <span class="w-2.5 h-2.5 rounded-full shrink-0" style="background:${esc(ev.color || "#7852ee")};"></span>
-                                <span class="text-xs font-semibold theme-text truncate">${esc(ev.title)}</span>
-                            </div>
-                            <span class="mono text-[11px] theme-muted shrink-0">${d}/${m}${ev.time ? " " + ev.time : ""}</span>
                         </button>
                     `;
-                }).join("");
+                }
+                grid.innerHTML = html;
+            }
+
+            // Painel do dia selecionado
+            const heading = document.getElementById("selectedDateHeading");
+            if (heading && selectedDateKey) {
+                const [sy, sm, sd] = selectedDateKey.split("-").map(Number);
+                const selDate = new Date(sy, sm - 1, sd);
+                heading.textContent = selDate.toLocaleDateString("pt-BR", { weekday: "long", day: "2-digit", month: "long", year: "numeric" });
+            }
+
+            const selList = document.getElementById("selectedDayEventsList");
+            if (selList) {
+                const dayEvents = [...(eventsByDate[selectedDateKey] || [])].sort((a, b) => (a.time || "99:99").localeCompare(b.time || "99:99"));
+                if (dayEvents.length === 0) {
+                    selList.innerHTML = `<p class="text-xs theme-muted italic py-2">Nenhum compromisso neste dia.</p>`;
+                } else {
+                    selList.innerHTML = dayEvents.map(ev => `
+                        <div class="theme-sub-card p-3 flex items-start justify-between gap-2.5 border-l-4" style="border-left-color:${esc(ev.color || "#7852ee")};">
+                            <div class="min-w-0">
+                                <div class="flex items-center gap-2">
+                                    ${ev.time ? `<span class="mono text-[11px] font-bold theme-accent-text">${esc(ev.time)}</span>` : ""}
+                                    <span class="font-semibold text-xs sm:text-sm theme-text break-words">${esc(ev.title)}</span>
+                                </div>
+                                ${ev.note ? `<p class="text-[11px] theme-muted mt-0.5 break-words">${esc(ev.note)}</p>` : ""}
+                            </div>
+                            <button onclick="app.deleteCalendarEvent('${ev.id}')" class="btn-danger-ghost p-1 text-xs shrink-0" title="Excluir">✕</button>
+                        </div>
+                    `).join("");
+                }
+            }
+
+            // Lista de próximos compromissos
+            const upcomingEl = document.getElementById("upcomingEventsList");
+            if (upcomingEl) {
+                const upcoming = events
+                    .filter(ev => ev.date >= todayKey)
+                    .sort((a, b) => a.date.localeCompare(b.date) || (a.time || "99:99").localeCompare(b.time || "99:99"))
+                    .slice(0, 6);
+
+                if (upcoming.length === 0) {
+                    upcomingEl.innerHTML = `<p class="text-xs theme-muted italic">Nenhum compromisso futuro agendado.</p>`;
+                } else {
+                    upcomingEl.innerHTML = upcoming.map(ev => {
+                        const [, um, ud] = ev.date.split("-");
+                        return `
+                            <button onclick="app.jumpToCalendarDate('${ev.date}')" class="w-full theme-sub-card theme-hover px-3 py-2 flex items-center justify-between gap-2 text-left">
+                                <div class="flex items-center gap-2 min-w-0">
+                                    <span class="w-2 h-2 rounded-full shrink-0" style="background-color:${esc(ev.color || "#7852ee")};"></span>
+                                    <span class="text-xs font-medium theme-text truncate">${esc(ev.title)}</span>
+                                </div>
+                                <span class="mono text-[11px] theme-muted shrink-0">${ud}/${um}${ev.time ? ` ${esc(ev.time)}` : ""}</span>
+                            </button>
+                        `;
+                    }).join("");
+                }
             }
         }
 
         // =========================================================
-        // 16. MÓDULO 7: LEITURAS (LIVROS, MANGÁS E HQS)
+        // 16. MÓDULO 7: LEITURAS (COM OBRAS EM LANÇAMENTO)
         // =========================================================
+        function getReadingTypeLabel(type) {
+            if (type === "manga") return "Mangá";
+            if (type === "livro") return "Livro";
+            if (type === "hq") return "HQ";
+            if (type === "webtoon") return "Webtoon";
+            return type || "Obra";
+        }
+
+        function getReadingUnitLabel(unit) {
+            return unit === "pag" ? "Pág." : "Cap.";
+        }
+
         function renderReadings() {
-            const statuses = ["all", "Lendo", "Quero Ler", "Pausado", "Concluído"];
-            document.getElementById("readingStatusFilters").innerHTML = statuses.map(s => {
-                const active = activeReadingStatus === s;
-                return `<button onclick="app.setReadingStatusFilter('${s}')" class="px-2.5 py-1.5 rounded-lg text-xs font-semibold shrink-0 ${active ? "btn-primary" : "btn-secondary"}">${s === "all" ? "Todas" : s}</button>`;
+            const statusFilters = [
+                { id: "all",       label: "Todos" },
+                { id: "ongoing",   label: "Em Lançamento" },
+                { id: "reading",   label: "Lendo" },
+                { id: "completed", label: "Concluídos" },
+                { id: "paused",    label: "Pausados" }
+            ];
+
+            document.getElementById("readingStatusFilters").innerHTML = statusFilters.map(s => {
+                const active = activeReadingStatus === s.id;
+                return `<button onclick="app.setReadingStatusFilter('${s.id}')" class="px-2.5 py-1.5 rounded-lg text-xs font-semibold shrink-0 ${active ? "btn-primary" : "btn-secondary"}">${s.label}</button>`;
             }).join("");
 
             const typeF = document.getElementById("readingTypeFilter")?.value || "all";
             const term = (document.getElementById("readingSearchInput")?.value || "").trim().toLowerCase();
 
             const filtered = (state.readings || []).filter(r => {
-                if (activeReadingStatus !== "all" && r.status !== activeReadingStatus) return false;
+                if (activeReadingStatus === "ongoing") {
+                    if (!r.ongoing && r.status !== "ongoing") return false;
+                } else if (activeReadingStatus !== "all" && r.status !== activeReadingStatus) {
+                    return false;
+                }
                 if (typeF !== "all" && r.type !== typeF) return false;
                 if (!term) return true;
                 return (r.title || "").toLowerCase().includes(term) || (r.note || "").toLowerCase().includes(term);
@@ -2798,46 +3467,110 @@
 
             const grid = document.getElementById("readingsGrid");
             if (filtered.length === 0) {
-                grid.innerHTML = `<div class="col-span-full theme-surface-card rounded-xl p-8 text-center theme-muted">Nenhuma obra encontrada. Clique em "+ Leitura" no topo!</div>`;
+                grid.innerHTML = `<div class="col-span-full theme-surface-card rounded-xl p-8 text-center theme-muted">Nenhuma obra encontrada neste filtro. Clique em "+ Leitura" no topo!</div>`;
                 return;
             }
 
             grid.innerHTML = filtered.map(r => {
-                const total = Math.max(1, Number(r.total) || 1);
-                const cur = Math.max(0, Math.min(total, Number(r.current) || 0));
-                const pct = Math.round((cur / total) * 100);
-                const stCls = r.status === "Lendo" ? "badge-emerald" : r.status === "Concluído" ? "badge-sky" : r.status === "Pausado" ? "badge-amber" : "badge-web";
-                return `
-                    <div class="theme-surface-card rounded-xl p-4 flex flex-col gap-3">
-                        <div class="flex items-start justify-between gap-2">
-                            <div class="min-w-0">
-                                <div class="flex items-center gap-1.5 mb-1">
-                                    <span class="tag-pill text-[10px] font-bold px-2 py-0.5 rounded-full">${esc(r.type)}</span>
-                                    <span class="text-[10px] font-bold px-2 py-0.5 rounded-full ${stCls}">${esc(r.status)}</span>
-                                </div>
-                                <h4 class="font-bold text-sm sm:text-base theme-text leading-snug">${esc(r.title)}</h4>
-                                ${r.note ? `<p class="text-xs theme-muted mt-0.5">${esc(r.note)}</p>` : ""}
+                const cur = Math.max(0, Number(r.current) || 0);
+                const total = Math.max(0, Number(r.total) || 0);
+                const unitLbl = getReadingUnitLabel(r.unit);
+                const typeLbl = getReadingTypeLabel(r.type);
+                const isOngoing = Boolean(r.ongoing);
+                const isCaughtUp = isOngoing && total > 0 && cur >= total;
+
+                // Badge de status / lançamento
+                let statusBadgeHtml = "";
+                if (isOngoing) {
+                    if (isCaughtUp) {
+                        statusBadgeHtml = `<span class="text-[10px] font-bold px-2 py-0.5 rounded-full badge-emerald">Em dia ✓</span>`;
+                    } else {
+                        statusBadgeHtml = `<span class="text-[10px] font-bold px-2 py-0.5 rounded-full badge-ongoing inline-flex items-center gap-1"><span class="w-1.5 h-1.5 rounded-full bg-current animate-pulse"></span>Em lançamento</span>`;
+                    }
+                    if (r.status === "paused") {
+                        statusBadgeHtml += ` <span class="text-[10px] font-bold px-2 py-0.5 rounded-full badge-amber">Pausado</span>`;
+                    }
+                } else {
+                    const stMeta = r.status === "completed"
+                        ? { cls: "badge-sky", text: "Concluído" }
+                        : r.status === "paused"
+                        ? { cls: "badge-amber", text: "Pausado" }
+                        : { cls: "badge-emerald", text: "Lendo" };
+                    statusBadgeHtml = `<span class="text-[10px] font-bold px-2 py-0.5 rounded-full ${stMeta.cls}">${stMeta.text}</span>`;
+                }
+
+                // Bloco de progresso (3 modos: ongoing sem total, ongoing com total lançado, finalizado/fixo)
+                let progressBlockHtml = "";
+                if (isOngoing && total === 0) {
+                    progressBlockHtml = `
+                        <div>
+                            <div class="flex items-center justify-between text-xs mono mb-1.5">
+                                <span class="theme-text font-bold">${unitLbl} ${cur} <span class="theme-muted font-normal">• Em lançamento</span></span>
+                                <span class="text-[11px] theme-accent-text font-semibold">∞ contínua</span>
                             </div>
-                            <div class="flex items-center gap-1 shrink-0">
-                                <button onclick="app.openReadingModal('${r.id}')" class="btn-ghost p-1.5 rounded-lg text-xs" title="Editar">✏️</button>
-                                <button onclick="app.deleteReading('${r.id}')" class="btn-danger-ghost p-1.5 rounded-lg text-xs" title="Excluir">🗑️</button>
+                            <div class="w-full h-2.5 rounded-full theme-input-bg overflow-hidden">
+                                <div class="h-full w-full ongoing-track"></div>
                             </div>
                         </div>
-
+                    `;
+                } else if (isOngoing && total > 0) {
+                    const pct = Math.min(100, Math.round((cur / total) * 100));
+                    const remaining = Math.max(0, total - cur);
+                    progressBlockHtml = `
+                        <div>
+                            <div class="flex items-center justify-between gap-2 text-xs mono mb-1.5">
+                                <span class="theme-muted">${unitLbl} <b class="theme-text">${cur}</b> / ${total} lançados</span>
+                                <button onclick="app.bumpReadingReleased('${r.id}')" class="btn-secondary px-2 py-0.5 text-[10px] font-bold theme-accent-text shrink-0" title="Registrar que saiu um capítulo novo">+1 lançado</button>
+                            </div>
+                            <div class="w-full h-2.5 rounded-full theme-input-bg overflow-hidden">
+                                <div class="h-full transition-all duration-300" style="width:${pct}%; background-color: var(--accent);"></div>
+                            </div>
+                            <div class="text-[10px] theme-muted mt-1 flex justify-between">
+                                <span>${remaining === 0 ? "Você está em dia com os lançamentos!" : `Faltam ${remaining} para ficar em dia`}</span>
+                                <span class="mono font-semibold theme-accent-text">${pct}%</span>
+                            </div>
+                        </div>
+                    `;
+                } else {
+                    const safeTotal = Math.max(1, total);
+                    const safeCur = Math.min(safeTotal, cur);
+                    const pct = Math.round((safeCur / safeTotal) * 100);
+                    progressBlockHtml = `
                         <div>
                             <div class="flex justify-between text-xs mono theme-muted mb-1">
-                                <span>${esc(r.unit || "Pág")} <b class="theme-text">${cur}</b> / ${total}</span>
+                                <span>${unitLbl} <b class="theme-text">${safeCur}</b> / ${safeTotal}</span>
                                 <span class="font-bold theme-accent-text">${pct}%</span>
                             </div>
                             <div class="w-full h-2.5 rounded-full theme-input-bg overflow-hidden">
                                 <div class="h-full transition-all duration-300" style="width:${pct}%; background-color: var(--accent);"></div>
                             </div>
                         </div>
+                    `;
+                }
+
+                return `
+                    <div class="theme-surface-card rounded-xl p-4 flex flex-col gap-3">
+                        <div class="flex items-start justify-between gap-2">
+                            <div class="min-w-0">
+                                <div class="flex items-center flex-wrap gap-1.5 mb-1">
+                                    <span class="tag-pill text-[10px] font-bold px-2 py-0.5 rounded-full">${esc(typeLbl)}</span>
+                                    ${statusBadgeHtml}
+                                </div>
+                                <h4 class="font-bold text-sm sm:text-base theme-text leading-snug">${esc(r.title)}</h4>
+                                ${r.note ? `<p class="text-xs theme-muted mt-0.5">${esc(r.note)}</p>` : ""}
+                            </div>
+                            <div class="flex items-center gap-1 shrink-0">
+                                <button onclick="app.openReadingModal('${r.id}')" class="btn-ghost p-1.5 rounded-lg text-xs" title="Editar / Alternar Em Lançamento">✏️</button>
+                                <button onclick="app.deleteReading('${r.id}')" class="btn-danger-ghost p-1.5 rounded-lg text-xs" title="Excluir">🗑️</button>
+                            </div>
+                        </div>
+
+                        ${progressBlockHtml}
 
                         <!-- Controles grandes otimizados para toque no celular -->
-                        <div class="grid grid-cols-5 gap-1.5 pt-1">
+                        <div class="grid grid-cols-5 gap-1.5 pt-1 mt-auto">
                             <button onclick="app.stepReading('${r.id}', -1)" class="btn-secondary py-2 rounded-xl text-xs font-bold mono">-1</button>
-                            <input type="number" min="0" max="${total}" value="${cur}" onchange="app.setReadingProgress('${r.id}', this.value)" class="input-themed rounded-xl text-center text-xs mono font-bold py-2 px-1" aria-label="Progresso atual">
+                            <input type="number" min="0" ${!isOngoing ? `max="${Math.max(1, total)}"` : ""} value="${cur}" onchange="app.setReadingProgress('${r.id}', this.value)" class="input-themed rounded-xl text-center text-xs mono font-bold py-2 px-1" aria-label="Progresso atual">
                             <button onclick="app.stepReading('${r.id}', 1)" class="btn-primary py-2 rounded-xl text-xs font-bold mono">+1</button>
                             <button onclick="app.stepReading('${r.id}', 5)" class="btn-secondary py-2 rounded-xl text-xs font-bold mono">+5</button>
                             <button onclick="app.stepReading('${r.id}', 10)" class="btn-secondary py-2 rounded-xl text-xs font-bold mono">+10</button>
@@ -2982,8 +3715,13 @@ service cloud.firestore {
             },
             restoreCloudBackup: async () => {
                 try {
-                    const backupRef = doc(db, "hubs", `${syncKey}_backup`);
-                    const snap = await getDoc(backupRef);
+                    const sdkOk = await ensureFirebase();
+                    if (!sdkOk) {
+                        showToast("Sem conexão com o Firebase para buscar o backup.", "warn");
+                        return;
+                    }
+                    const backupRef = fbSdk.doc(db, "hubs", `${syncKey}_backup`);
+                    const snap = await fbSdk.getDoc(backupRef);
                     if (!snap.exists()) {
                         showToast("Nenhum backup automático (_backup) encontrado na nuvem para esta chave.", "warn");
                         return;
@@ -3459,6 +4197,36 @@ service cloud.firestore {
 
             // --- Módulo 5: Projetos Ativos ---
             selectProject: (id) => { activeProjectId = id; renderProjects(); },
+            selectModalProjectColor: (hex) => {
+                renderProjectColorSwatches(hex);
+            },
+            openProjectColorModal: (projId) => {
+                const p = state.projects.find(x => x.id === projId);
+                if (!p) return;
+                quickColorProjectId = projId;
+                const curColor = (p.color || "#7852ee").toLowerCase();
+                document.getElementById("quickProjColorPicker").value = curColor;
+                document.getElementById("quickProjectColorGrid").innerHTML = PROJECT_COLORS.map(c => {
+                    const isSel = c.hex.toLowerCase() === curColor;
+                    return `
+                        <button type="button" onclick="app.applyQuickProjectColor('${c.hex}')" title="${c.name}" class="w-8 h-8 rounded-full transition-transform hover:scale-110 flex items-center justify-center ${isSel ? "ring-2 ring-offset-2 ring-offset-[var(--bg-panel)] scale-110" : ""}" style="background-color:${c.hex};">
+                            ${isSel ? `<span class="text-xs font-bold text-white">✓</span>` : ""}
+                        </button>
+                    `;
+                }).join("");
+                document.getElementById("projectColorModal").classList.remove("hidden");
+            },
+            applyQuickProjectColor: (hex) => {
+                if (!quickColorProjectId) return;
+                const p = state.projects.find(x => x.id === quickColorProjectId);
+                if (!p) return;
+                p.color = hex;
+                document.getElementById("projectColorModal").classList.add("hidden");
+                quickColorProjectId = null;
+                renderProjects();
+                commitUserMutation("Alterar cor do Projeto");
+                showToast("Cor do projeto atualizada!", "success");
+            },
             openProjectModal: (editId = null) => {
                 const p = editId ? state.projects.find(x => x.id === editId) : null;
                 document.getElementById("projectModalTitle").textContent = p ? "Editar Projeto" : "Novo Projeto";
@@ -3466,6 +4234,7 @@ service cloud.firestore {
                 document.getElementById("projNameInput").value = p ? p.name : "";
                 document.getElementById("projStatusInput").value = p ? p.status : "Ativo";
                 document.getElementById("projDescInput").value = p ? (p.desc || "") : "";
+                renderProjectColorSwatches(p ? (p.color || "#7852ee") : PROJECT_COLORS[state.projects.length % PROJECT_COLORS.length].hex);
                 document.getElementById("projectModal").classList.remove("hidden");
                 setTimeout(() => document.getElementById("projNameInput").focus(), 50);
             },
@@ -3474,14 +4243,15 @@ service cloud.firestore {
                 const editId = document.getElementById("projEditId").value;
                 const name = document.getElementById("projNameInput").value.trim();
                 const status = document.getElementById("projStatusInput").value;
+                const color = document.getElementById("projColorInput").value || "#7852ee";
                 const desc = document.getElementById("projDescInput").value.trim();
                 if (!name) return;
 
                 if (editId) {
                     const p = state.projects.find(x => x.id === editId);
-                    if (p) { p.name = name; p.status = status; p.desc = desc; }
+                    if (p) { p.name = name; p.status = status; p.color = color; p.desc = desc; }
                 } else {
-                    const np = { id: uid(), name, status, desc, features: [] };
+                    const np = { id: uid(), name, status, color, desc, features: [] };
                     state.projects.push(np);
                     activeProjectId = np.id;
                 }
@@ -3576,17 +4346,46 @@ service cloud.firestore {
             // --- Módulo 7: Leituras ---
             renderReadings,
             setReadingStatusFilter: (st) => { activeReadingStatus = st; renderReadings(); },
+            onReadingTypeChange: () => {
+                const type = document.getElementById("readTypeInput").value;
+                const unitSel = document.getElementById("readUnitInput");
+                unitSel.value = type === "livro" ? "pag" : "cap";
+                app.onReadingOngoingToggle();
+            },
+            onReadingOngoingToggle: () => {
+                const ongoing = document.getElementById("readOngoingInput").checked;
+                const unit = document.getElementById("readUnitInput").value;
+                const totalLabel = document.getElementById("readTotalLabel");
+                const totalInput = document.getElementById("readTotalInput");
+                const statusSel = document.getElementById("readStatusInput");
+
+                if (ongoing) {
+                    totalLabel.textContent = unit === "pag" ? "Últ. pág. lançada (opc.)" : "Últ. cap. lançado (opc.)";
+                    totalInput.required = false;
+                    totalInput.min = "0";
+                    totalInput.placeholder = "Vazio = livre";
+                    if (statusSel.value === "completed") statusSel.value = "ongoing";
+                } else {
+                    totalLabel.textContent = unit === "pag" ? "Total de páginas *" : "Total de capítulos *";
+                    totalInput.required = true;
+                    totalInput.min = "1";
+                    totalInput.placeholder = "Ex: 320";
+                    if (statusSel.value === "ongoing") statusSel.value = "reading";
+                }
+            },
             openReadingModal: (editId = null) => {
                 const r = editId ? state.readings.find(x => x.id === editId) : null;
                 document.getElementById("readingModalTitle").textContent = r ? "Editar Leitura" : "Nova Leitura";
                 document.getElementById("readEditId").value = r ? r.id : "";
                 document.getElementById("readTitleInput").value = r ? r.title : "";
-                document.getElementById("readTypeInput").value = r ? r.type : "Livro";
-                document.getElementById("readStatusInput").value = r ? r.status : "Lendo";
-                document.getElementById("readUnitInput").value = r ? (r.unit || "Pág") : "Pág";
+                document.getElementById("readTypeInput").value = r ? r.type : "manga";
+                document.getElementById("readStatusInput").value = r ? r.status : "reading";
+                document.getElementById("readOngoingInput").checked = r ? Boolean(r.ongoing) : false;
+                document.getElementById("readUnitInput").value = r ? (r.unit || "cap") : "cap";
                 document.getElementById("readCurrentInput").value = r ? (r.current || 0) : 0;
-                document.getElementById("readTotalInput").value = r ? (r.total || 100) : 100;
+                document.getElementById("readTotalInput").value = r ? (r.ongoing && !r.total ? "" : r.total) : "";
                 document.getElementById("readNoteInput").value = r ? (r.note || "") : "";
+                app.onReadingOngoingToggle();
                 document.getElementById("readingModal").classList.remove("hidden");
                 setTimeout(() => document.getElementById("readTitleInput").focus(), 50);
             },
@@ -3595,19 +4394,29 @@ service cloud.firestore {
                 const editId = document.getElementById("readEditId").value;
                 const title = document.getElementById("readTitleInput").value.trim();
                 const type = document.getElementById("readTypeInput").value;
+                const ongoing = document.getElementById("readOngoingInput").checked;
                 let status = document.getElementById("readStatusInput").value;
                 const unit = document.getElementById("readUnitInput").value;
-                const total = Math.max(1, parseInt(document.getElementById("readTotalInput").value, 10) || 1);
-                const current = Math.max(0, Math.min(total, parseInt(document.getElementById("readCurrentInput").value, 10) || 0));
+                const rawTotal = document.getElementById("readTotalInput").value.trim();
+                let current = Math.max(0, parseInt(document.getElementById("readCurrentInput").value, 10) || 0);
+                let total = rawTotal === "" ? 0 : Math.max(0, parseInt(rawTotal, 10) || 0);
                 const note = document.getElementById("readNoteInput").value.trim();
                 if (!title) return;
-                if (current >= total) status = "Concluído";
+
+                if (ongoing) {
+                    if (status === "completed") status = "ongoing";
+                    if (total > 0 && current > total) total = current;
+                } else {
+                    total = Math.max(1, total || current || 1);
+                    current = Math.min(total, current);
+                    if (current >= total) status = "completed";
+                }
 
                 if (editId) {
                     const r = state.readings.find(x => x.id === editId);
-                    if (r) Object.assign(r, { title, type, status, unit, current, total, note });
+                    if (r) Object.assign(r, { title, type, status, unit, ongoing, current, total, note });
                 } else {
-                    state.readings.unshift({ id: uid(), title, type, status, unit, current, total, note });
+                    state.readings.unshift({ id: uid(), title, type, status, unit, ongoing, current, total, note });
                 }
                 document.getElementById("readingModal").classList.add("hidden");
                 renderReadings();
@@ -3616,22 +4425,47 @@ service cloud.firestore {
             stepReading: (id, delta) => {
                 const r = state.readings.find(x => x.id === id);
                 if (!r) return;
-                const total = Math.max(1, Number(r.total) || 1);
-                r.current = Math.max(0, Math.min(total, (Number(r.current) || 0) + delta));
-                if (r.current >= total) r.status = "Concluído";
-                else if (r.current > 0 && r.status === "Quero Ler") r.status = "Lendo";
+                const next = Math.max(0, (Number(r.current) || 0) + delta);
+                if (r.ongoing) {
+                    r.current = next;
+                    if (r.total > 0 && r.current > r.total) {
+                        r.total = r.current;
+                    }
+                } else {
+                    const total = Math.max(1, Number(r.total) || 1);
+                    r.current = Math.min(total, next);
+                    if (r.current >= total) r.status = "completed";
+                    else if (r.status === "completed" && r.current < total) r.status = "reading";
+                }
                 renderReadings();
                 commitUserMutation("Progresso de Leitura");
             },
             setReadingProgress: (id, rawVal) => {
                 const r = state.readings.find(x => x.id === id);
                 if (!r) return;
-                const total = Math.max(1, Number(r.total) || 1);
                 const val = parseInt(rawVal, 10);
-                r.current = Number.isFinite(val) ? Math.max(0, Math.min(total, val)) : 0;
-                if (r.current >= total) r.status = "Concluído";
+                const next = Number.isFinite(val) ? Math.max(0, val) : 0;
+                if (r.ongoing) {
+                    r.current = next;
+                    if (r.total > 0 && r.current > r.total) {
+                        r.total = r.current;
+                    }
+                } else {
+                    const total = Math.max(1, Number(r.total) || 1);
+                    r.current = Math.min(total, next);
+                    if (r.current >= total) r.status = "completed";
+                    else if (r.status === "completed" && r.current < total) r.status = "reading";
+                }
                 renderReadings();
                 commitUserMutation("Progresso de Leitura");
+            },
+            bumpReadingReleased: (id) => {
+                const r = state.readings.find(x => x.id === id);
+                if (!r || !r.ongoing) return;
+                r.total = Math.max(r.current || 0, Number(r.total) || 0) + 1;
+                renderReadings();
+                commitUserMutation("Novo capítulo lançado");
+                showToast(`${r.title}: atualizado para ${r.total} lançados!`, "info");
             },
             deleteReading: async (id) => {
                 const r = state.readings.find(x => x.id === id);
